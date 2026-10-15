@@ -96,6 +96,11 @@
     box-shadow: 0 0 0 var(--gr-border-focus-width) var(--gr-color-focus-ring-inner);
   }
 
+  /* The outline alone gives links 4.22:1; the inner band would only add noise on text. */
+  a:focus-visible {
+    box-shadow: none;
+  }
+
   ::selection {
     background-color: var(--gr-color-action-primary-background);
     color: var(--gr-color-action-primary-foreground);
