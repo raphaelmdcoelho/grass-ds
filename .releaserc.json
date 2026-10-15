@@ -6,7 +6,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "pnpm install --frozen-lockfile && pnpm build && pnpm -r exec npm pkg set version=${nextRelease.version}",
+        "prepareCmd": "pnpm build && pnpm -r exec npm pkg set version=${nextRelease.version}",
         "publishCmd": "pnpm -r publish --access public --provenance --no-git-checks"
       }
     ],
