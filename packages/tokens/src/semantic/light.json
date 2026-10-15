@@ -44,13 +44,13 @@
       },
       "secondary": {
         "background": {
-          "$value": "{palette.olive.100}"
-        },
-        "background-hover": {
           "$value": "{palette.olive.200}"
         },
-        "background-active": {
+        "background-hover": {
           "$value": "{palette.olive.300}"
+        },
+        "background-active": {
+          "$value": "{palette.olive.400}"
         },
         "foreground": {
           "$value": "{palette.olive.950}"

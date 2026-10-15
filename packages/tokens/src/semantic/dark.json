@@ -47,10 +47,10 @@
           "$value": "{palette.olive.800}"
         },
         "background-hover": {
-          "$value": "{palette.olive.900}"
+          "$value": "{palette.olive.750}"
         },
         "background-active": {
-          "$value": "{palette.olive.950}"
+          "$value": "{palette.olive.700}"
         },
         "foreground": {
           "$value": "{palette.olive.50}"

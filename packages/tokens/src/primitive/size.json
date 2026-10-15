@@ -13,7 +13,7 @@
     "full": {
       "$value": "9999px"
     },
-    "$description": "md is the 8px base corner. "
+    "$description": "md is the 8px base corner."
   },
   "border-width": {
     "$type": "dimension",

@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { checkPairs } from './lib/contrast.mjs';
 import { runContrastCheck } from './lib/check.mjs';
+import { THEMES, resolvedTokens } from './lib/dictionary.mjs';
 
 const thresholds = { text: 4.5, ui: 3 };
 
@@ -47,4 +48,20 @@ test('translucent colours are rejected', () => {
 test('the real token source meets AA in both themes', async () => {
   const failures = await runContrastCheck({ log: () => {} });
   assert.deepEqual(failures, []);
+});
+
+test('no action state background equals a surface in either theme', async () => {
+  for (const theme of THEMES) {
+    const tokens = await resolvedTokens(theme);
+    const surfaces = Object.entries(tokens).filter(([path]) => path.startsWith('color.surface.'));
+    const states = Object.entries(tokens).filter(([path]) =>
+      /^color\.action\..+\.background/.test(path),
+    );
+    assert.ok(states.length > 0 && surfaces.length > 0);
+    for (const [statePath, state] of states) {
+      for (const [surfacePath, surface] of surfaces) {
+        assert.notEqual(state, surface, `${theme}: ${statePath} is identical to ${surfacePath}`);
+      }
+    }
+  }
 });
