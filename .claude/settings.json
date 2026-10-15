@@ -1,0 +1,7 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"${CLAUDE_PROJECT_DIR:-/home/rmdcoelho/Documents/repositories/grass-ds}/.claude/statusline.sh\"",
+    "padding": 0
+  }
+}

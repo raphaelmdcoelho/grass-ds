@@ -1,7 +1,11 @@
 node_modules/
 dist/
 storybook-static/
+coverage/
 *.log
+*.tsbuildinfo
+.pnpm-store/
+.env*
 .DS_Store
 .maestri/
 .claude/settings.local.json
