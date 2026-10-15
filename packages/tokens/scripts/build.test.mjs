@@ -38,3 +38,11 @@ test('motion collapses under prefers-reduced-motion', () => {
   for (const step of ['100', '200', '300'])
     assert.match(reduced, new RegExp(`--gr-duration-${step}: 0ms;`));
 });
+
+test('dark overrides the overlay elevation so overlays keep visible depth', () => {
+  assert.match(css, /--gr-elevation-overlay: var\(--gr-shadow-soft\);/);
+  const dark = css.split(':root[data-theme="dark"] {')[1];
+  assert.match(dark, /--gr-elevation-overlay: var\(--gr-shadow-soft-dark\);/);
+  const media = css.split('@media (prefers-color-scheme: dark)')[1].split('@media')[0];
+  assert.match(media, /--gr-elevation-overlay: var\(--gr-shadow-soft-dark\);/);
+});

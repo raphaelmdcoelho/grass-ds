@@ -153,5 +153,12 @@
       }
     },
     "$type": "color"
+  },
+  "elevation": {
+    "$type": "shadow",
+    "overlay": {
+      "$value": "{shadow.soft-dark}"
+    },
+    "$description": "Black shadows vanish on near-black surfaces, so the dark overlay shadow is stronger and adds a faint light edge."
   }
 }

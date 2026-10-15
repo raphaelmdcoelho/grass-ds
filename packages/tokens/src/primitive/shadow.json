@@ -1,7 +1,7 @@
 {
   "shadow": {
     "$type": "shadow",
-    "$description": "Depth is mostly flat; shadows are reserved for overlays.",
+    "$description": "Depth is mostly flat; shadows are reserved for overlays. soft is for light surfaces, soft-dark for dark ones.",
     "soft": {
       "$value": [
         {
@@ -13,6 +13,31 @@
         },
         {
           "color": "oklch(0 0 0 / 0.12)",
+          "offsetX": "0",
+          "offsetY": "12px",
+          "blur": "32px",
+          "spread": "-4px"
+        }
+      ]
+    },
+    "soft-dark": {
+      "$value": [
+        {
+          "color": "oklch(1 0 0 / 0.1)",
+          "offsetX": "0",
+          "offsetY": "0",
+          "blur": "0",
+          "spread": "1px"
+        },
+        {
+          "color": "oklch(0 0 0 / 0.4)",
+          "offsetX": "0",
+          "offsetY": "2px",
+          "blur": "6px",
+          "spread": "0"
+        },
+        {
+          "color": "oklch(0 0 0 / 0.5)",
           "offsetX": "0",
           "offsetY": "12px",
           "blur": "32px",

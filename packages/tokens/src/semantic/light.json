@@ -153,5 +153,11 @@
       }
     },
     "$type": "color"
+  },
+  "elevation": {
+    "$type": "shadow",
+    "overlay": {
+      "$value": "{shadow.soft}"
+    }
   }
 }
