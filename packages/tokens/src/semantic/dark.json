@@ -55,6 +55,31 @@
         "foreground": {
           "$value": "{palette.olive.50}"
         }
+      },
+      "danger": {
+        "background": {
+          "$value": "{palette.clay.400}"
+        },
+        "background-hover": {
+          "$value": "{palette.clay.300}"
+        },
+        "background-active": {
+          "$value": "{palette.clay.200}"
+        },
+        "foreground": {
+          "$value": "{palette.olive.975}"
+        }
+      },
+      "disabled": {
+        "background": {
+          "$value": "{palette.olive.800}"
+        },
+        "foreground": {
+          "$value": "{palette.olive.600}"
+        },
+        "border": {
+          "$value": "{palette.olive.750}"
+        }
       }
     },
     "link": {
