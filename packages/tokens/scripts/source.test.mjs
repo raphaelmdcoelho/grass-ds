@@ -28,12 +28,8 @@ test('every semantic foreground is covered by at least one contrast pair', () =>
     /^color\.text\./.test(path) ||
     /\.(foreground|on-solid|text)$/.test(path) ||
     /^color\.link\./.test(path);
-  // Inactive components are exempt from WCAG contrast (1.4.3), so disabled text is not paired.
-  const exempt = new Set(['color.action.disabled.foreground']);
   const covered = new Set(contrast.pairs.map((pair) => pair.fg));
-  const missing = Object.keys(light).filter(
-    (path) => isForeground(path) && !exempt.has(path) && !covered.has(path),
-  );
+  const missing = Object.keys(light).filter((path) => isForeground(path) && !covered.has(path));
   assert.deepEqual(missing, []);
 });
 

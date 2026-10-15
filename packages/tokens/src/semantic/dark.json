@@ -75,7 +75,7 @@
           "$value": "{palette.olive.800}"
         },
         "foreground": {
-          "$value": "{palette.olive.600}"
+          "$value": "{palette.olive.400}"
         },
         "border": {
           "$value": "{palette.olive.750}"
