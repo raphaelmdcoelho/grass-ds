@@ -1,0 +1,82 @@
+/* Presentation of the catalog itself. Not part of the system: no gr- classes, only tokens. */
+.catalog-page {
+  padding: var(--gr-layout-inset-loose);
+}
+
+.catalog-section {
+  margin-block-end: var(--gr-layout-gap-loose);
+}
+
+.catalog-note {
+  max-inline-size: 60ch;
+}
+
+.catalog-swatches {
+  --gr-grid-min: 9rem;
+}
+
+.catalog-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gr-layout-gap-tight);
+  font-size: var(--gr-text-size-small);
+}
+
+.catalog-swatch__chip {
+  block-size: 3.5rem;
+  border: var(--gr-border-width) solid var(--gr-color-border-default);
+  border-radius: var(--gr-radius-control);
+}
+
+.catalog-swatch__name {
+  font-family: var(--gr-text-family-code);
+  overflow-wrap: anywhere;
+}
+
+.catalog-bar {
+  block-size: 1rem;
+  border-radius: var(--gr-radius-small);
+  background-color: var(--gr-color-action-primary-background);
+}
+
+.catalog-row {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  align-items: center;
+  gap: var(--gr-layout-gap-default);
+}
+
+.catalog-box {
+  padding: var(--gr-layout-inset-tight) var(--gr-layout-inset-default);
+  border-radius: var(--gr-radius-control);
+  background-color: var(--gr-color-surface-sunken);
+  border: var(--gr-border-width) solid var(--gr-color-border-default);
+}
+
+.catalog-tile {
+  display: grid;
+  place-items: center;
+  block-size: 6rem;
+  background-color: var(--gr-color-surface-raised);
+  border: var(--gr-border-width) solid var(--gr-color-border-default);
+}
+
+.catalog-motion {
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: var(--gr-radius-pill);
+  background-color: var(--gr-color-action-primary-background);
+  transition: translate var(--catalog-duration, var(--gr-motion-duration-default))
+    var(--gr-motion-easing-default);
+
+  .catalog-motion-track:is(:hover, :focus-within) & {
+    translate: calc(100cqi - 3rem) 0;
+  }
+}
+
+.catalog-motion-track {
+  container-type: inline-size;
+  padding: var(--gr-layout-inset-tight);
+  border-radius: var(--gr-radius-pill);
+  background-color: var(--gr-color-surface-sunken);
+}

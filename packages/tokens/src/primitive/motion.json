@@ -1,0 +1,14 @@
+{
+  "duration": {
+    "$type": "duration",
+    "100": { "$value": "100ms" },
+    "200": { "$value": "200ms" },
+    "300": { "$value": "300ms" }
+  },
+  "easing": {
+    "$type": "cubicBezier",
+    "standard": { "$value": [0.2, 0, 0, 1] },
+    "decelerate": { "$value": [0, 0, 0, 1] },
+    "accelerate": { "$value": [0.3, 0, 1, 1] }
+  }
+}

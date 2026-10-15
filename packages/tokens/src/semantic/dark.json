@@ -1,0 +1,157 @@
+{
+  "color": {
+    "surface": {
+      "default": {
+        "$value": "{palette.olive.950}"
+      },
+      "raised": {
+        "$value": "{palette.olive.900}"
+      },
+      "sunken": {
+        "$value": "{palette.olive.975}"
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{palette.olive.50}"
+      },
+      "muted": {
+        "$value": "{palette.olive.400}"
+      }
+    },
+    "border": {
+      "default": {
+        "$value": "{palette.olive.800}"
+      },
+      "strong": {
+        "$value": "{palette.olive.500}"
+      }
+    },
+    "action": {
+      "primary": {
+        "background": {
+          "$value": "{palette.grass.400}"
+        },
+        "background-hover": {
+          "$value": "{palette.grass.300}"
+        },
+        "background-active": {
+          "$value": "{palette.grass.200}"
+        },
+        "foreground": {
+          "$value": "{palette.olive.975}"
+        }
+      },
+      "secondary": {
+        "background": {
+          "$value": "{palette.olive.800}"
+        },
+        "background-hover": {
+          "$value": "{palette.olive.750}"
+        },
+        "background-active": {
+          "$value": "{palette.olive.700}"
+        },
+        "foreground": {
+          "$value": "{palette.olive.50}"
+        }
+      }
+    },
+    "link": {
+      "default": {
+        "$value": "{palette.grass.300}"
+      },
+      "hover": {
+        "$value": "{palette.grass.200}"
+      }
+    },
+    "focus": {
+      "ring": {
+        "$value": "{palette.sky.300}"
+      },
+      "ring-inner": {
+        "$value": "{palette.olive.975}"
+      }
+    },
+    "overlay": {
+      "backdrop": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0, 0, 0],
+          "alpha": 0.6
+        }
+      }
+    },
+    "feedback": {
+      "success": {
+        "surface": {
+          "$value": "{palette.fern.950}"
+        },
+        "text": {
+          "$value": "{palette.fern.200}"
+        },
+        "border": {
+          "$value": "{palette.fern.700}"
+        },
+        "solid": {
+          "$value": "{palette.fern.400}"
+        },
+        "on-solid": {
+          "$value": "{palette.olive.975}"
+        }
+      },
+      "warning": {
+        "surface": {
+          "$value": "{palette.sun.950}"
+        },
+        "text": {
+          "$value": "{palette.sun.200}"
+        },
+        "border": {
+          "$value": "{palette.sun.700}"
+        },
+        "solid": {
+          "$value": "{palette.sun.400}"
+        },
+        "on-solid": {
+          "$value": "{palette.olive.975}"
+        }
+      },
+      "danger": {
+        "surface": {
+          "$value": "{palette.clay.950}"
+        },
+        "text": {
+          "$value": "{palette.clay.200}"
+        },
+        "border": {
+          "$value": "{palette.clay.700}"
+        },
+        "solid": {
+          "$value": "{palette.clay.400}"
+        },
+        "on-solid": {
+          "$value": "{palette.olive.975}"
+        }
+      },
+      "info": {
+        "surface": {
+          "$value": "{palette.sky.950}"
+        },
+        "text": {
+          "$value": "{palette.sky.200}"
+        },
+        "border": {
+          "$value": "{palette.sky.700}"
+        },
+        "solid": {
+          "$value": "{palette.sky.400}"
+        },
+        "on-solid": {
+          "$value": "{palette.olive.975}"
+        }
+      }
+    },
+    "$type": "color"
+  }
+}

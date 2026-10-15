@@ -1,0 +1,29 @@
+{
+  "button": {
+    "radius": { "$type": "dimension", "$value": "{radius.pill}" },
+    "padding-block": { "$type": "dimension", "$value": "{layout.inset.tight}" },
+    "padding-inline": { "$type": "dimension", "$value": "{layout.inset.default}" },
+    "gap": { "$type": "dimension", "$value": "{layout.gap.tight}" },
+    "font-weight": { "$type": "fontWeight", "$value": "{text.weight.emphasis}" },
+    "transition-duration": { "$type": "duration", "$value": "{motion.duration.fast}" },
+    "primary": {
+      "$type": "color",
+      "background": { "$value": "{color.action.primary.background}" },
+      "background-hover": { "$value": "{color.action.primary.background-hover}" },
+      "background-active": { "$value": "{color.action.primary.background-active}" },
+      "foreground": { "$value": "{color.action.primary.foreground}" }
+    },
+    "secondary": {
+      "$type": "color",
+      "background": { "$value": "{color.action.secondary.background}" },
+      "background-hover": { "$value": "{color.action.secondary.background-hover}" },
+      "background-active": { "$value": "{color.action.secondary.background-active}" },
+      "foreground": { "$value": "{color.action.secondary.foreground}" }
+    },
+    "danger": {
+      "$type": "color",
+      "background": { "$value": "{color.feedback.danger.solid}" },
+      "foreground": { "$value": "{color.feedback.danger.on-solid}" }
+    }
+  }
+}

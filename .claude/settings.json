@@ -1,0 +1,7 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$(git rev-parse --show-toplevel)/.claude/statusline.sh\"",
+    "padding": 0
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "dialog": {
+    "background": { "$type": "color", "$value": "{color.surface.raised}" },
+    "foreground": { "$type": "color", "$value": "{color.text.default}" },
+    "backdrop": { "$type": "color", "$value": "{color.overlay.backdrop}" },
+    "radius": { "$type": "dimension", "$value": "{radius.surface}" },
+    "padding": { "$type": "dimension", "$value": "{layout.inset.loose}" },
+    "shadow": { "$type": "shadow", "$value": "{elevation.overlay}" }
+  }
+}

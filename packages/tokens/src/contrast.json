@@ -1,0 +1,210 @@
+{
+  "$description": "Semantic foreground/background pairs that must meet WCAG 2.2 AA in every theme. 'text' needs 4.5:1; 'large-text' and 'ui' need 3:1. Tokens are dot paths into the semantic tier. Filled controls (e.g. the primary button) are not paired with the page surface: their label identifies them (WCAG 1.4.11 does not require the fill to contrast). The focus ring is dual-colour: ring-inner must contrast with the control it surrounds, ring with the inner band and the page. The outer ring (color.focus.ring) carries the 3:1 requirement on every background it can meet: the page surfaces. The inner band (color.focus.ring-inner) is guaranteed only against the primary action background.",
+  "thresholds": {
+    "text": 4.5,
+    "large-text": 3,
+    "ui": 3
+  },
+  "pairs": [
+    {
+      "fg": "color.text.default",
+      "bg": "color.surface.default",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.default",
+      "bg": "color.surface.raised",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.default",
+      "bg": "color.surface.sunken",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.muted",
+      "bg": "color.surface.default",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.muted",
+      "bg": "color.surface.raised",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.muted",
+      "bg": "color.surface.sunken",
+      "level": "text"
+    },
+    {
+      "fg": "color.link.default",
+      "bg": "color.surface.default",
+      "level": "text"
+    },
+    {
+      "fg": "color.link.hover",
+      "bg": "color.surface.default",
+      "level": "text"
+    },
+    {
+      "fg": "color.link.default",
+      "bg": "color.surface.raised",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.primary.foreground",
+      "bg": "color.action.primary.background",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.primary.foreground",
+      "bg": "color.action.primary.background-hover",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.primary.foreground",
+      "bg": "color.action.primary.background-active",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.secondary.foreground",
+      "bg": "color.action.secondary.background",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.secondary.foreground",
+      "bg": "color.action.secondary.background-hover",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.secondary.foreground",
+      "bg": "color.action.secondary.background-active",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.success.text",
+      "bg": "color.feedback.success.surface",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.warning.text",
+      "bg": "color.feedback.warning.surface",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.danger.text",
+      "bg": "color.feedback.danger.surface",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.info.text",
+      "bg": "color.feedback.info.surface",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.danger.text",
+      "bg": "color.surface.raised",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.success.on-solid",
+      "bg": "color.feedback.success.solid",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.warning.on-solid",
+      "bg": "color.feedback.warning.solid",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.danger.on-solid",
+      "bg": "color.feedback.danger.solid",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.info.on-solid",
+      "bg": "color.feedback.info.solid",
+      "level": "text"
+    },
+    {
+      "fg": "color.border.strong",
+      "bg": "color.surface.default",
+      "level": "ui"
+    },
+    {
+      "fg": "color.border.strong",
+      "bg": "color.surface.raised",
+      "level": "ui"
+    },
+    {
+      "fg": "color.focus.ring",
+      "bg": "color.surface.default",
+      "level": "ui"
+    },
+    {
+      "fg": "color.focus.ring",
+      "bg": "color.surface.raised",
+      "level": "ui"
+    },
+    {
+      "fg": "color.link.hover",
+      "bg": "color.surface.raised",
+      "level": "text"
+    },
+    {
+      "fg": "color.link.default",
+      "bg": "color.surface.sunken",
+      "level": "text"
+    },
+    {
+      "fg": "color.link.hover",
+      "bg": "color.surface.sunken",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.muted",
+      "bg": "color.feedback.success.surface",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.muted",
+      "bg": "color.feedback.warning.surface",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.muted",
+      "bg": "color.feedback.danger.surface",
+      "level": "text"
+    },
+    {
+      "fg": "color.text.muted",
+      "bg": "color.feedback.info.surface",
+      "level": "text"
+    },
+    {
+      "fg": "color.border.strong",
+      "bg": "color.surface.sunken",
+      "level": "ui"
+    },
+    {
+      "fg": "color.focus.ring-inner",
+      "bg": "color.action.primary.background",
+      "level": "ui"
+    },
+    {
+      "fg": "color.focus.ring-inner",
+      "bg": "color.action.primary.background-hover",
+      "level": "ui"
+    },
+    {
+      "fg": "color.focus.ring-inner",
+      "bg": "color.action.primary.background-active",
+      "level": "ui"
+    },
+    {
+      "fg": "color.focus.ring",
+      "bg": "color.focus.ring-inner",
+      "level": "ui"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+/* Cascade order of the style layer. Declared first so consumer CSS outside any layer always wins. */
+@layer grass.tokens, grass.reset, grass.base, grass.layout, grass.components, grass.utilities;

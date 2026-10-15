@@ -1,0 +1,9 @@
+{
+  "card": {
+    "background": { "$type": "color", "$value": "{color.surface.raised}" },
+    "foreground": { "$type": "color", "$value": "{color.text.default}" },
+    "border": { "$type": "color", "$value": "{color.border.default}" },
+    "radius": { "$type": "dimension", "$value": "{radius.surface}" },
+    "padding": { "$type": "dimension", "$value": "{layout.inset.default}" }
+  }
+}

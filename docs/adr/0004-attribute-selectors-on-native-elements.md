@@ -1,0 +1,3 @@
+# Implementations enhance native elements via attribute selectors
+
+Components backed by a native element are applied as attributes on that element (`<button grButton>`, `<input grTextField>`, `<input type="checkbox" grCheckbox>`); only composites with no native equivalent (Card, Dialog) are custom elements (`<gr-card>`). This keeps native semantics, keyboard behaviour and form participation, so Angular forms work without custom `ControlValueAccessor`s and the markup contract maps one-to-one onto any future framework (e.g. React). The cost is less control over internal structure than a wrapping `<gr-button>` would give.

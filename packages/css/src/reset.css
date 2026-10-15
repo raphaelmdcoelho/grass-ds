@@ -1,0 +1,67 @@
+@layer grass.reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  html {
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-block-size: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img,
+  picture,
+  video,
+  canvas {
+    display: block;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    max-inline-size: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+
+  :where(ul, ol)[role='list'] {
+    list-style: none;
+    padding: 0;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  [hidden]:not([hidden='until-found']) {
+    display: none !important;
+  }
+}
