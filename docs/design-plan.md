@@ -22,7 +22,7 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 ## Tokens
 
 - Three tiers: primitive → semantic → component. Only semantic tokens change between themes.
-- Themes: light and dark only. The OS preference (`prefers-color-scheme`) applies by default, and `data-theme="light|dark"` on `<html>` forces a theme.
+- Themes: light and dark only. The OS preference (`prefers-color-scheme`) applies by default, and `data-theme="light|dark"` on `<html>` forces a theme. Themes switch only on `<html>`; scoped (per-subtree) themes are not supported because component tokens resolve their `var()` references at `:root`.
 - Build fails if any semantic foreground/background pair misses WCAG 2.2 AA contrast (4.5:1 for text, 3:1 for large text and UI) in either theme.
 
 ## Visual direction (grass-inspired)
@@ -55,7 +55,7 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 
 ## Catalog
 
-- One Storybook site, run locally and published to GitHub Pages. It composes a framework-free Reference Storybook (`@storybook/html`) with the Angular Storybook ([ADR 0006](./adr/0006-catalog-composes-reference-and-implementation-storybooks.md)).
+- One Storybook site, run locally and published to GitHub Pages. It composes a framework-free Reference Storybook (`@storybook/html-vite`, the Vite framework package for the HTML renderer) with the Angular Storybook ([ADR 0006](./adr/0006-catalog-composes-reference-and-implementation-storybooks.md)).
 - Drift check: Playwright visual snapshots compare Angular stories with the matching Reference stories in both themes. Added once the v1 components exist.
 
 ## Repo & tooling

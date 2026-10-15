@@ -15,15 +15,15 @@ The single, canonical set of token definitions from which every other artifact i
 _Avoid_: Theme file, config
 
 **Primitive token**:
-A raw value with no meaning attached (e.g. `green.500`, `space.4`); never used directly by the style layer.
+A raw value with no meaning attached (e.g. `palette.grass.500`, `space.4`); never used directly by the style layer.
 _Avoid_: Base token, global token
 
 **Semantic token**:
-A token named for its purpose (e.g. `color.surface`, `color.action.primary`) that points at a primitive; the only tier whose values differ between themes.
+A token named for its purpose (e.g. `color.surface.default`, `color.action.primary.background`) that points at a primitive; the only tier whose values differ between themes.
 _Avoid_: Alias token, role
 
 **Component token**:
-A token scoped to one component (e.g. `button.background`) that points at a semantic token.
+A token scoped to one component (e.g. `button.primary.background`) that points at a semantic token.
 _Avoid_: Local variable, override
 
 **Theme**:
