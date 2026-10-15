@@ -69,7 +69,7 @@
   transition: translate var(--catalog-duration, var(--gr-motion-duration-default))
     var(--gr-motion-easing-default);
 
-  .catalog-motion-track:hover & {
+  .catalog-motion-track:is(:hover, :focus-within) & {
     translate: calc(100cqi - 3rem) 0;
   }
 }
