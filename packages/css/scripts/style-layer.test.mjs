@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import postcss from 'postcss';
 import { buildCss } from './build.mjs';
 
@@ -9,7 +9,7 @@ const root = postcss.parse(css);
 const tokensCss = await readFile(new URL('../../tokens/dist/tokens.css', import.meta.url), 'utf8');
 
 // Primitive tokens are never used directly by the style layer (CONTEXT.md).
-const PRIMITIVE = /^--gr-(palette|space|corner|font|duration|easing|shadow|border-width)-/;
+const PRIMITIVE = /^--gr-(palette|space|corner|size|font|duration|easing|shadow|border-width)-/;
 
 const layerNames = (rule) => rule.params.split(',').map((name) => name.trim());
 
@@ -59,4 +59,21 @@ test('layout utilities exist', () => {
   for (const name of ['gr-container', 'gr-stack', 'gr-cluster', 'gr-grid']) {
     assert.match(css, new RegExp(`\\.${name}\\b`));
   }
+});
+
+test('container queries are opt-in so .gr-container does not trap fixed descendants', () => {
+  root.walkRules(/\.gr-container/, (rule) => {
+    assert.ok(
+      rule.nodes.every((node) => node.prop !== 'container-type') ||
+        rule.selector.includes('[data-query]'),
+      `${rule.selector} sets container-type unconditionally`,
+    );
+  });
+});
+
+test('every url() in fonts.css points at a file in dist/fonts', async () => {
+  const fonts = await readFile(new URL('../src/fonts.css', import.meta.url), 'utf8');
+  const urls = [...fonts.matchAll(/url\(["']?\.\/([^"')]+)["']?\)/g)].map((m) => m[1]);
+  assert.ok(urls.length > 0);
+  for (const url of urls) await access(new URL(`../dist/${url}`, import.meta.url));
 });

@@ -1,5 +1,5 @@
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 
 const here = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url));
@@ -34,4 +34,4 @@ async function build() {
   console.log(`Wrote dist/grass.css, dist/fonts.css and ${files.length} font files`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) await build();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) await build();
