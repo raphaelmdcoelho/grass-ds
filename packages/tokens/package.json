@@ -3,6 +3,13 @@
   "version": "0.0.0-development",
   "description": "Grass Design System tokens: DTCG source and generated CSS custom properties.",
   "license": "MIT",
+  "homepage": "https://raphaelmdcoelho.github.io/grass-ds/",
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "css-custom-properties",
+    "dtcg"
+  ],
   "type": "module",
   "files": [
     "dist",
