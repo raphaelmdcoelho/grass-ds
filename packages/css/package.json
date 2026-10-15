@@ -1,0 +1,32 @@
+{
+  "name": "@grass-ds/css",
+  "version": "0.0.0-development",
+  "description": "Grass Design System style layer: foundations and component CSS, plus optional self-hosted Figtree.",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./grass.css": "./dist/grass.css",
+    "./fonts.css": "./dist/fonts.css",
+    "./fonts/*": "./dist/fonts/*",
+    "./package.json": "./package.json"
+  },
+  "style": "./dist/grass.css",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test scripts/"
+  },
+  "peerDependencies": {
+    "@grass-ds/tokens": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@grass-ds/tokens": "workspace:*",
+    "postcss": "^8.5.30"
+  }
+}

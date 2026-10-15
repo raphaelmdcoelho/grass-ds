@@ -1,0 +1,78 @@
+/*
+ * Layout utilities. Variants are data attributes, e.g. <div class="gr-stack" data-gap="loose">.
+ * Responsiveness is intrinsic (wrapping, auto-fit) or driven by container queries, never by viewport breakpoints.
+ */
+@layer grass.layout {
+  .gr-container {
+    --gr-container-gutter: var(--gr-layout-gutter);
+
+    inline-size: min(100% - 2 * var(--gr-container-gutter), var(--gr-layout-container));
+    margin-inline: auto;
+    container-type: inline-size;
+  }
+
+  /* Vertical rhythm between direct children. */
+  .gr-stack {
+    --gr-stack-gap: var(--gr-layout-gap-default);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--gr-stack-gap);
+
+    &[data-gap='tight'] {
+      --gr-stack-gap: var(--gr-layout-gap-tight);
+    }
+
+    &[data-gap='loose'] {
+      --gr-stack-gap: var(--gr-layout-gap-loose);
+    }
+  }
+
+  /* Horizontal group that wraps when it runs out of room. */
+  .gr-cluster {
+    --gr-cluster-gap: var(--gr-layout-gap-default);
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gr-cluster-gap);
+
+    &[data-gap='tight'] {
+      --gr-cluster-gap: var(--gr-layout-gap-tight);
+    }
+
+    &[data-gap='loose'] {
+      --gr-cluster-gap: var(--gr-layout-gap-loose);
+    }
+
+    &[data-justify='end'] {
+      justify-content: flex-end;
+    }
+
+    &[data-justify='between'] {
+      justify-content: space-between;
+    }
+
+    &[data-align='start'] {
+      align-items: flex-start;
+    }
+  }
+
+  /* Columns of at least --gr-grid-min wide, as many as fit the container. */
+  .gr-grid {
+    --gr-grid-min: 16rem;
+    --gr-grid-gap: var(--gr-layout-gap-default);
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--gr-grid-min), 100%), 1fr));
+    gap: var(--gr-grid-gap);
+
+    &[data-gap='tight'] {
+      --gr-grid-gap: var(--gr-layout-gap-tight);
+    }
+
+    &[data-gap='loose'] {
+      --gr-grid-gap: var(--gr-layout-gap-loose);
+    }
+  }
+}

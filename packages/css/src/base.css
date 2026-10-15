@@ -1,0 +1,117 @@
+/* Typography and colour application: what every page gets before any component. */
+@layer grass.base {
+  html {
+    font-family: var(--gr-text-family-body);
+    font-size: 100%;
+  }
+
+  body {
+    background-color: var(--gr-color-surface-default);
+    color: var(--gr-color-text-default);
+    font-size: var(--gr-text-size-body);
+    font-weight: var(--gr-text-weight-body);
+    line-height: var(--gr-text-line-height-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--gr-text-family-heading);
+    font-weight: var(--gr-text-weight-heading);
+    line-height: var(--gr-text-line-height-heading);
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--gr-text-size-heading-1);
+  }
+
+  h2 {
+    font-size: var(--gr-text-size-heading-2);
+  }
+
+  h3 {
+    font-size: var(--gr-text-size-heading-3);
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-size: var(--gr-text-size-heading-4);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  small {
+    font-size: var(--gr-text-size-small);
+  }
+
+  strong,
+  b {
+    font-weight: var(--gr-text-weight-heading);
+  }
+
+  a {
+    color: var(--gr-color-link-default);
+    text-underline-offset: 0.2em;
+
+    &:hover {
+      color: var(--gr-color-link-hover);
+    }
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--gr-text-family-code);
+    font-size: 0.9em;
+  }
+
+  pre {
+    overflow-x: auto;
+    padding: var(--gr-layout-inset-default);
+    border-radius: var(--gr-radius-control);
+    background-color: var(--gr-color-surface-sunken);
+  }
+
+  hr {
+    border: 0;
+    border-block-start: var(--gr-border-width) solid var(--gr-color-border-default);
+  }
+
+  :focus-visible {
+    outline: var(--gr-border-focus-width) solid var(--gr-color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--gr-color-action-primary-background);
+    color: var(--gr-color-action-primary-foreground);
+  }
+
+  /* Typographic helpers for elements that are not headings or paragraphs. */
+  .gr-display {
+    font-size: var(--gr-text-size-display);
+    font-weight: var(--gr-text-weight-heading);
+    line-height: var(--gr-text-line-height-heading);
+  }
+
+  .gr-lead {
+    font-size: var(--gr-text-size-lead);
+    line-height: var(--gr-text-line-height-compact);
+  }
+
+  .gr-text-small {
+    font-size: var(--gr-text-size-small);
+  }
+
+  .gr-text-muted {
+    color: var(--gr-color-text-muted);
+  }
+}
