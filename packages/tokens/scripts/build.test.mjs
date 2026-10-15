@@ -32,3 +32,9 @@ test('spacing follows the 4px grid', () => {
   assert.match(css, /--gr-space-1: 0\.25rem;/);
   assert.match(css, /--gr-space-16: 4rem;/);
 });
+
+test('motion collapses under prefers-reduced-motion', () => {
+  const reduced = css.split('@media (prefers-reduced-motion: reduce) {')[1].split('}')[0];
+  for (const step of ['100', '200', '300'])
+    assert.match(reduced, new RegExp(`--gr-duration-${step}: 0ms;`));
+});

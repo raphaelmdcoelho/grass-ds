@@ -17,6 +17,12 @@ async function declarations(theme, scope) {
 export async function buildCss() {
   const light = await declarations('light', 'base');
   const dark = await declarations('dark', 'theme');
+  // Collapsing the primitive durations is enough: semantic and component durations reference them.
+  const instant = light
+    .split('\n')
+    .filter((line) => /^--gr-duration-\w+:/.test(line))
+    .map((line) => line.replace(/:.*;/, ': 0ms;'))
+    .join('\n');
   return `${[
     '/**',
     ' * Do not edit directly: generated from the DTCG token source by @grass-ds/tokens.',
@@ -33,6 +39,12 @@ export async function buildCss() {
     '    :root:not([data-theme="light"]) {',
     '      color-scheme: dark;',
     indent(dark, '      '),
+    '    }',
+    '  }',
+    '',
+    '  @media (prefers-reduced-motion: reduce) {',
+    '    :root {',
+    indent(instant, '      '),
     '    }',
     '  }',
     '',
