@@ -76,8 +76,9 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 ## Milestones
 
 1. **0.1**: tokens, foundations, `@grass-ds/css`, Reference Catalog (no Angular yet).
-2. **0.2–0.x**: Angular Button, TextField, Checkbox, Card, Dialog, then the drift check.
-   - Focus ring composition: the foundations focus ring is an outline plus an inner band drawn with `box-shadow`, so a component's own `box-shadow` would replace the band. Components must compose it: expose something like `--gr-focus-inner` and require `box-shadow: var(--gr-focus-inner), <own>`, with a css test that enforces it.
+2. **0.2–0.x**: one component per release, each with its style layer CSS, Reference story, Angular directive or component and Angular story: 0.2 Angular foundations and Button, then TextField, Checkbox, Card and Dialog, then the drift check.
+   - Focus ring composition (done in 0.2): the foundations focus ring is an outline plus an inner band drawn with `box-shadow`, so a component's own `box-shadow` would replace the band. The band is exposed as `--gr-focus-inner` (transparent unless the element itself has focus) and components must write `box-shadow: var(--gr-focus-inner), <own>`; a css test enforces it.
+   - Dark elevation (done in 0.2): `elevation.overlay` is defined per theme; dark uses a stronger shadow plus a faint light edge.
 3. **1.0**: all five components stable in Angular.
 
 ## Open points
