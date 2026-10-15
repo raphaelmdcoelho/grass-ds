@@ -1,0 +1,5 @@
+# This repo publishes packages to npm; consumers live elsewhere
+
+This repository is a monorepo of packages only; it publishes them to the public npm registry and each consumer app installs them from its own repository. We chose this over keeping apps inside the monorepo so apps can upgrade on their own schedule, which makes versioning and changelogs a first-class concern. The npm scope `@grass` is already taken by another owner, so packages publish under the `@grass-ds` scope (`@grass-ds/tokens`, `@grass-ds/css`, `@grass-ds/angular`).
+
+All packages share one version number, so a consumer can never pair an implementation with a style layer or token set it was not built against. Releases are fully automatic with semantic-release: every merge to `main` derives the next version from Conventional Commits, sets it on every package, tags, publishes all packages and deploys the Catalog. There is no release PR and no changeset files; the repo is treated as one release unit, which is what makes semantic-release workable in a monorepo here. Changesets and release-please were rejected as extra bookkeeping or an extra review step.

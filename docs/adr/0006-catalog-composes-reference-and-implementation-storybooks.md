@@ -1,0 +1,3 @@
+# The Catalog composes a framework-free Reference with per-framework Storybooks
+
+The Catalog is one Storybook site, published to GitHub Pages, that composes a Reference Storybook (`@storybook/html`, using only `@grass-ds/css`) with one Storybook per implementation (Angular now; others if ever added). The Reference, not the Angular stories, is the canonical markup contract, so the contract stays framework-free and automated drift checks compare each implementation's stories against the matching Reference stories. Making the Angular Storybook the reference would have been simpler but would tie the contract to Angular and make any future implementation copy from Angular.
