@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  DestroyRef,
   ViewEncapsulation,
   booleanAttribute,
   computed,
@@ -27,28 +28,50 @@ export type GrButtonVariant = 'primary' | 'secondary' | 'danger';
     // A <button> uses the native attribute (not focusable, never clicks); anything else gets ARIA.
     '[attr.disabled]': 'nativeDisabled() ? "" : null',
     '[attr.aria-disabled]': 'ariaDisabled()',
-    '(click)': 'onClick($event)',
+    // Parity with the Reference: a <button> never submits unless the consumer says type="submit".
+    '[attr.type]': 'type',
   },
 })
 export class GrButton {
   /** Visual variant, set as `data-variant` on the host. */
   readonly variant = input<GrButtonVariant>('primary');
 
-  /** Disables the button: natively on `<button>`, with `aria-disabled` and no navigation on `<a>`. */
+  /**
+   * Disables the button: natively on `<button>`; on `<a>` with `aria-disabled="true"` and every
+   * click (including Ctrl/middle-click and Enter) cancelled before any consumer handler runs.
+   */
   readonly disabled = input(false, { transform: booleanAttribute });
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly isButton = this.element.localName === 'button';
-  // A binding to null would remove an aria-disabled attribute the consumer wrote in the template.
+  // Host bindings to null would remove attributes the consumer wrote in the template, so the
+  // authored values are read once. Write them statically; do not bind [attr.aria-disabled] or
+  // [attr.type] on the same element.
   private readonly authoredAriaDisabled = this.element.getAttribute('aria-disabled');
+  protected readonly type = this.isButton
+    ? (this.element.getAttribute('type') ?? 'button')
+    : this.element.getAttribute('type');
 
   protected readonly nativeDisabled = computed(() => this.disabled() && this.isButton);
   protected readonly ariaDisabled = computed(() =>
     this.disabled() && !this.isButton ? 'true' : this.authoredAriaDisabled,
   );
 
-  protected onClick(event: Event): void {
-    // aria-disabled does not stop navigation or form submission, so it is stopped by hand.
-    if (this.ariaDisabled() === 'true') event.preventDefault();
+  constructor() {
+    // Capture phase on the host itself runs before the (click) listeners a template registers, and
+    // stopImmediatePropagation keeps those from firing. aria-disabled alone stops neither
+    // navigation nor handlers, and auxclick is what middle-click navigation uses.
+    const block = (event: Event) => {
+      if (this.disabled() || this.element.getAttribute('aria-disabled') === 'true') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    };
+    for (const name of ['click', 'auxclick'])
+      this.element.addEventListener(name, block, { capture: true });
+    inject(DestroyRef).onDestroy(() => {
+      for (const name of ['click', 'auxclick'])
+        this.element.removeEventListener(name, block, { capture: true });
+    });
   }
 }

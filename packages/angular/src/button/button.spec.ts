@@ -15,6 +15,16 @@ import { GrButton, GrButtonVariant } from './button';
       Save
     </button>
     <a grButton id="link" href="#target" [disabled]="disabled()">Docs</a>
+    <a
+      grButton
+      id="handled"
+      href="#target"
+      [disabled]="disabled()"
+      (click)="linkClicks.update((n) => n + 1)"
+      >Save link</a
+    >
+    <button grButton id="submit" type="submit">Submit</button>
+    <button grButton id="reset" type="reset">Reset</button>
     <button grButton id="plain" disabled>Static</button>
     <button grButton id="aria" aria-disabled="true">Aria</button>
   `,
@@ -23,6 +33,7 @@ class Host {
   readonly variant = signal<GrButtonVariant>('primary');
   readonly disabled = signal(false);
   readonly clicks = signal(0);
+  readonly linkClicks = signal(0);
 }
 
 async function setup() {
@@ -107,5 +118,58 @@ describe('GrButton', () => {
     const { fixture } = await setup();
     expect(document.head.querySelectorAll('style[ng-app-id]').length).toBe(0);
     expect(fixture.nativeElement.querySelector('#native').getAttribute('style')).toBeNull();
+  });
+
+  it('never calls a consumer (click) handler on a disabled link, and does again once enabled', async () => {
+    const { get, host, fixture } = await setup();
+    const link = get('handled');
+    host.disabled.set(true);
+    await fixture.whenStable();
+    link.click();
+    expect(host.linkClicks()).toBe(0);
+    host.disabled.set(false);
+    await fixture.whenStable();
+    link.click();
+    expect(host.linkClicks()).toBe(1);
+  });
+
+  it('cancels middle-click (auxclick) and Ctrl-click navigation on a disabled link', async () => {
+    const { get, host, fixture } = await setup();
+    host.disabled.set(true);
+    await fixture.whenStable();
+    const link = get('link');
+    const fire = (type: string, init: MouseEventInit) =>
+      link.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, ...init }));
+    expect(fire('auxclick', { button: 1 })).toBe(false);
+    expect(fire('click', { ctrlKey: true })).toBe(false);
+    host.disabled.set(false);
+    await fixture.whenStable();
+    expect(fire('auxclick', { button: 1 })).toBe(true);
+  });
+
+  it('honours an aria-disabled attribute set at runtime', async () => {
+    const { get, host } = await setup();
+    const link = get('handled');
+    link.setAttribute('aria-disabled', 'true');
+    link.click();
+    expect(host.linkClicks()).toBe(0);
+  });
+
+  it('defaults <button> to type="button" and lets an explicit type win', async () => {
+    const { get } = await setup();
+    expect(get('native').getAttribute('type')).toBe('button');
+    expect(get('plain').getAttribute('type')).toBe('button');
+    expect(get('submit').getAttribute('type')).toBe('submit');
+    expect(get('reset').getAttribute('type')).toBe('reset');
+    expect(get('link').hasAttribute('type')).toBe(false);
+  });
+
+  it('removes its listeners when destroyed', async () => {
+    const { fixture, get } = await setup();
+    const link = get('handled');
+    const remove = vi.spyOn(link, 'removeEventListener');
+    fixture.destroy();
+    expect(remove).toHaveBeenCalledWith('click', expect.any(Function), { capture: true });
+    expect(remove).toHaveBeenCalledWith('auxclick', expect.any(Function), { capture: true });
   });
 });
