@@ -1,7 +1,10 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
-  "cli": { "packageManager": "pnpm", "analytics": false },
+  "cli": {
+    "packageManager": "pnpm",
+    "analytics": false
+  },
   "projects": {
     "catalog-angular": {
       "projectType": "application",
@@ -12,26 +15,29 @@
           "builder": "@storybook/angular:start-storybook",
           "options": {
             "configDir": ".storybook",
-            "tsConfig": "tsconfig.json",
             "port": 6007,
             "compodoc": false,
             "experimentalZoneless": true,
-            "styles": [
-              "node_modules/@grass-ds/tokens/dist/tokens.css",
-              "node_modules/@grass-ds/css/dist/fonts.css",
-              "node_modules/@grass-ds/css/dist/grass.css",
-              "../reference/.storybook/catalog.css"
-            ]
+            "browserTarget": "catalog-angular:build"
           }
         },
         "build-storybook": {
           "builder": "@storybook/angular:build-storybook",
           "options": {
             "configDir": ".storybook",
-            "tsConfig": "tsconfig.json",
             "outputDir": "storybook-static",
             "compodoc": false,
             "experimentalZoneless": true,
+            "browserTarget": "catalog-angular:build"
+          }
+        },
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "$comment": "Never run: Storybook reads its Angular build options (styles, tsConfig) from this target.",
+          "options": {
+            "outputPath": "out-tsc/unused",
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.json",
             "styles": [
               "node_modules/@grass-ds/tokens/dist/tokens.css",
               "node_modules/@grass-ds/css/dist/fonts.css",

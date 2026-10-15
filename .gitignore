@@ -12,3 +12,4 @@ coverage/
 .claude/settings.local.json
 out-tsc/
 .angular/
+catalog/site/

@@ -7,6 +7,7 @@ export default [
     ignores: [
       '**/dist/**',
       '**/storybook-static/**',
+      'catalog/site/**',
       '**/node_modules/**',
       '**/out-tsc/**',
       '**/.angular/**',
