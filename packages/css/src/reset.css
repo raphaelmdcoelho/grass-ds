@@ -10,7 +10,7 @@
   }
 
   html {
-    text-size-adjust: none;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -21,9 +21,15 @@
   img,
   picture,
   video,
+  canvas {
+    display: block;
+  }
+
+  img,
+  picture,
+  video,
   canvas,
   svg {
-    display: block;
     max-inline-size: 100%;
   }
 

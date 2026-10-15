@@ -53,7 +53,7 @@
 
   strong,
   b {
-    font-weight: var(--gr-text-weight-heading);
+    font-weight: var(--gr-text-weight-emphasis);
   }
 
   a {
@@ -73,6 +73,10 @@
     font-size: 0.9em;
   }
 
+  pre code {
+    font-size: inherit;
+  }
+
   pre {
     overflow-x: auto;
     padding: var(--gr-layout-inset-default);
@@ -85,9 +89,11 @@
     border-block-start: var(--gr-border-width) solid var(--gr-color-border-default);
   }
 
+  /* Dual-colour ring: the inner band contrasts with the control, the outer ring with the page. */
   :focus-visible {
     outline: var(--gr-border-focus-width) solid var(--gr-color-focus-ring);
-    outline-offset: 2px;
+    outline-offset: var(--gr-border-focus-width);
+    box-shadow: 0 0 0 var(--gr-border-focus-width) var(--gr-color-focus-ring-inner);
   }
 
   ::selection {
