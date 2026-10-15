@@ -77,3 +77,27 @@ test('every url() in fonts.css points at a file in dist/fonts', async () => {
   assert.ok(urls.length > 0);
   for (const url of urls) await access(new URL(`../dist/${url}`, import.meta.url));
 });
+
+test('component rules that set box-shadow compose --gr-focus-inner', () => {
+  // grass.base owns the focus ring; every later layer would replace its band with its own shadow.
+  root.walkAtRules('layer', (layer) => {
+    if (!layer.nodes || layer.params === 'grass.base') return;
+    layer.walkDecls('box-shadow', (decl) => {
+      assert.match(
+        decl.value,
+        /^var\(--gr-focus-inner\)(,|$)/,
+        `${decl.parent.selector} sets box-shadow without leading with var(--gr-focus-inner)`,
+      );
+    });
+  });
+});
+
+test('the focus band is transparent unless the element itself is focused', () => {
+  const base = root.nodes.find((n) => n.type === 'atrule' && n.params === 'grass.base');
+  const resets = [];
+  base.walkRules((rule) => {
+    if (rule.selector.split(',').some((s) => s.trim() === '*'))
+      rule.walkDecls('--gr-focus-inner', (decl) => resets.push(decl.value));
+  });
+  assert.deepEqual(resets, ['0 0 0 0 transparent']);
+});
