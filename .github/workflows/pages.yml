@@ -30,7 +30,7 @@ jobs:
       - run: pnpm build:catalog
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: catalog/reference/storybook-static
+          path: catalog/site
 
   deploy:
     name: Deploy to GitHub Pages

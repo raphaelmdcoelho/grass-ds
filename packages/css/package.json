@@ -3,6 +3,13 @@
   "version": "0.0.0-development",
   "description": "Grass Design System style layer: foundations and component CSS, plus optional self-hosted Figtree.",
   "license": "MIT",
+  "homepage": "https://raphaelmdcoelho.github.io/grass-ds/",
+  "keywords": [
+    "design-system",
+    "css",
+    "css-layers",
+    "theming"
+  ],
   "type": "module",
   "files": [
     "dist"

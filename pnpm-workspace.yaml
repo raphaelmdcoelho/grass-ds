@@ -5,3 +5,28 @@ packages:
 # Dependency build scripts are blocked by default; esbuild (Storybook/Vite) needs its postinstall.
 allowBuilds:
   esbuild: true
+  # Angular's build tooling pulls these in; they ship prebuilt binaries and need no install script.
+  '@parcel/watcher': false
+  lmdb: false
+  msgpackr-extract: false
+
+minimumReleaseAgeExclude:
+  - '@angular-devkit/architect@0.2202.3'
+  - '@angular-devkit/core@22.2.3'
+  - '@angular-devkit/schematics@22.2.3'
+  - '@angular/build@22.2.3'
+  - '@angular/cli@22.2.3'
+  - '@angular/common@22.2.3'
+  - '@angular/compiler-cli@22.2.3'
+  - '@angular/compiler@22.2.3'
+  - '@angular/core@22.2.3'
+  - '@angular/platform-browser@22.2.3'
+  - '@schematics/angular@22.2.3'
+  - '@vitest/mocker@5.0.5'
+  - '@vitest/spy@5.0.5'
+  - jsdom@30.1.3
+  - vitest@5.0.5
+  - '@angular-devkit/build-angular@22.2.3'
+  - '@angular-devkit/build-webpack@0.2202.3'
+  - '@angular/platform-browser-dynamic@22.2.3'
+  - '@ngtools/webpack@22.2.3'

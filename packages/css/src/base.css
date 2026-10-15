@@ -89,16 +89,34 @@
     border-block-start: var(--gr-border-width) solid var(--gr-color-border-default);
   }
 
-  /* Dual-colour ring: the inner band contrasts with the control, the outer ring with the page. */
+  /*
+   * Dual-colour ring: the inner band contrasts with the control, the outer ring with the page.
+   * The band is drawn with box-shadow, which a component's own box-shadow would replace, so it is
+   * exposed as --gr-focus-inner (transparent unless the element itself has focus) and components
+   * must compose it: box-shadow: var(--gr-focus-inner), <own>. A css test enforces this.
+   */
+  :root {
+    --gr-focus-band: 0 0 0 var(--gr-border-focus-width) var(--gr-color-focus-ring-inner);
+  }
+
+  /* Set on every element so that only the focused one draws the band, never its descendants. */
+  *,
+  *::before,
+  *::after {
+    --gr-focus-inner: 0 0 0 0 transparent;
+  }
+
   :focus-visible {
+    --gr-focus-inner: var(--gr-focus-band);
+
     outline: var(--gr-border-focus-width) solid var(--gr-color-focus-ring);
     outline-offset: var(--gr-border-focus-width);
-    box-shadow: 0 0 0 var(--gr-border-focus-width) var(--gr-color-focus-ring-inner);
+    box-shadow: var(--gr-focus-inner);
   }
 
   /* The outline alone gives links 4.22:1; the inner band would only add noise on text. */
   a:focus-visible {
-    box-shadow: none;
+    --gr-focus-inner: 0 0 0 0 transparent;
   }
 
   ::selection {

@@ -1,6 +1,12 @@
 {
   "extends": ["stylelint-config-standard"],
-  "ignoreFiles": ["**/dist/**", "**/storybook-static/**", "**/node_modules/**", ".maestri/**"],
+  "ignoreFiles": [
+    "**/dist/**",
+    "**/storybook-static/**",
+    "catalog/site/**",
+    "**/node_modules/**",
+    ".maestri/**"
+  ],
   "rules": {
     "selector-class-pattern": [
       "^(gr-)?[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9-]+)?$",

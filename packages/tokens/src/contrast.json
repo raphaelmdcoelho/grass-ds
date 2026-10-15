@@ -1,5 +1,5 @@
 {
-  "$description": "Semantic foreground/background pairs that must meet WCAG 2.2 AA in every theme. 'text' needs 4.5:1; 'large-text' and 'ui' need 3:1. Tokens are dot paths into the semantic tier. Filled controls (e.g. the primary button) are not paired with the page surface: their label identifies them (WCAG 1.4.11 does not require the fill to contrast). The focus ring is dual-colour: ring-inner must contrast with the control it surrounds, ring with the inner band and the page. The outer ring (color.focus.ring) carries the 3:1 requirement on every background it can meet: the page surfaces. The inner band (color.focus.ring-inner) is guaranteed only against the primary action background.",
+  "$description": "Semantic foreground/background pairs that must meet WCAG 2.2 AA in every theme. 'text' needs 4.5:1; 'large-text' and 'ui' need 3:1. Tokens are dot paths into the semantic tier. Filled controls (e.g. the primary button) are not paired with the page surface: their label identifies them (WCAG 1.4.11 does not require the fill to contrast). The focus ring is dual-colour: ring-inner must contrast with the control it surrounds, ring with the inner band and the page. The outer ring (color.focus.ring) carries the 3:1 requirement on every background it can meet: the page surfaces. The inner band (color.focus.ring-inner) is guaranteed only against the primary action background. Disabled controls (color.action.disabled.*) are exempt from contrast (WCAG 1.4.3 and 1.4.11 exclude inactive components) and are deliberately quieter than enabled ones, but disabled links stay focusable, so the label is still held to 3:1 against its own fill and the page surfaces. Secondary and danger buttons are not paired with the inner band: it is a separator, and the outer ring carries the 3:1 requirement against the page.",
   "thresholds": {
     "text": 4.5,
     "large-text": 3,
@@ -204,6 +204,41 @@
     {
       "fg": "color.focus.ring",
       "bg": "color.focus.ring-inner",
+      "level": "ui"
+    },
+    {
+      "fg": "color.action.danger.foreground",
+      "bg": "color.action.danger.background",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.danger.foreground",
+      "bg": "color.action.danger.background-hover",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.danger.foreground",
+      "bg": "color.action.danger.background-active",
+      "level": "text"
+    },
+    {
+      "fg": "color.action.disabled.foreground",
+      "bg": "color.action.disabled.background",
+      "level": "ui"
+    },
+    {
+      "fg": "color.action.disabled.foreground",
+      "bg": "color.surface.default",
+      "level": "ui"
+    },
+    {
+      "fg": "color.action.disabled.foreground",
+      "bg": "color.surface.raised",
+      "level": "ui"
+    },
+    {
+      "fg": "color.action.disabled.foreground",
+      "bg": "color.surface.sunken",
       "level": "ui"
     }
   ]

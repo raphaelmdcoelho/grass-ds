@@ -151,12 +151,6 @@
       }
     }
   },
-  "elevation": {
-    "overlay": {
-      "$type": "shadow",
-      "$value": "{shadow.soft}"
-    }
-  },
   "control": {
     "indicator-size": {
       "$type": "dimension",

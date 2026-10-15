@@ -55,6 +55,31 @@
         "foreground": {
           "$value": "{palette.olive.50}"
         }
+      },
+      "danger": {
+        "background": {
+          "$value": "{palette.clay.400}"
+        },
+        "background-hover": {
+          "$value": "{palette.clay.300}"
+        },
+        "background-active": {
+          "$value": "{palette.clay.200}"
+        },
+        "foreground": {
+          "$value": "{palette.olive.975}"
+        }
+      },
+      "disabled": {
+        "background": {
+          "$value": "{palette.olive.800}"
+        },
+        "foreground": {
+          "$value": "{palette.olive.400}"
+        },
+        "border": {
+          "$value": "{palette.olive.750}"
+        }
       }
     },
     "link": {
@@ -153,5 +178,12 @@
       }
     },
     "$type": "color"
+  },
+  "elevation": {
+    "$type": "shadow",
+    "overlay": {
+      "$value": "{shadow.soft-dark}"
+    },
+    "$description": "Black shadows vanish on near-black surfaces, so the dark overlay shadow is stronger and adds a faint light edge."
   }
 }

@@ -55,6 +55,31 @@
         "foreground": {
           "$value": "{palette.olive.950}"
         }
+      },
+      "danger": {
+        "background": {
+          "$value": "{palette.clay.700}"
+        },
+        "background-hover": {
+          "$value": "{palette.clay.800}"
+        },
+        "background-active": {
+          "$value": "{palette.clay.900}"
+        },
+        "foreground": {
+          "$value": "{palette.white}"
+        }
+      },
+      "disabled": {
+        "background": {
+          "$value": "{palette.olive.200}"
+        },
+        "foreground": {
+          "$value": "{palette.olive.600}"
+        },
+        "border": {
+          "$value": "{palette.olive.300}"
+        }
       }
     },
     "link": {
@@ -153,5 +178,11 @@
       }
     },
     "$type": "color"
+  },
+  "elevation": {
+    "$type": "shadow",
+    "overlay": {
+      "$value": "{shadow.soft}"
+    }
   }
 }

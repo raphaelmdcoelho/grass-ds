@@ -10,3 +10,6 @@ coverage/
 .DS_Store
 .maestri/
 .claude/settings.local.json
+out-tsc/
+.angular/
+catalog/site/
