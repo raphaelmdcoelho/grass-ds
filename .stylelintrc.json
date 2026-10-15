@@ -1,0 +1,13 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "ignoreFiles": ["**/dist/**", "**/storybook-static/**", "**/node_modules/**", ".maestri/**"],
+  "rules": {
+    "selector-class-pattern": [
+      "^(gr-)?[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9-]+)?$",
+      { "message": "Use kebab-case; component classes use the gr- prefix." }
+    ],
+    "custom-property-pattern": "^(gr-)?[a-z0-9]+(-[a-z0-9]+)*$",
+    "import-notation": null,
+    "at-rule-no-unknown": [true, { "ignoreAtRules": ["layer"] }]
+  }
+}
