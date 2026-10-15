@@ -42,7 +42,7 @@ export const Motion = {
       ${['fast', 'default', 'slow']
         .map(
           (speed) =>
-            `<div class="catalog-row"><span class="catalog-swatch__name">motion-duration-${speed}</span><div class="catalog-motion-track" tabindex="0"><div class="catalog-motion" style="--catalog-duration: var(--gr-motion-duration-${speed})"></div></div></div>`,
+            `<div class="catalog-row"><span class="catalog-swatch__name">motion-duration-${speed}</span><div class="catalog-motion-track" tabindex="0" role="group" aria-label="motion-duration-${speed} demo"><div class="catalog-motion" style="--catalog-duration: var(--gr-motion-duration-${speed})"></div></div></div>`,
         )
         .join('')}
     </div>`,

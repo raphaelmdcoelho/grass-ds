@@ -17,6 +17,7 @@ export function parseTokens(css) {
       break;
     }
   }
+  if (end === -1) throw new Error('tokens.css has an unbalanced :root block');
   const block = stripped.slice(open + 1, end);
   return [...block.matchAll(/(--gr-[\w-]+)\s*:\s*([^;]+);/g)].map(([, name, value]) => ({
     name,
