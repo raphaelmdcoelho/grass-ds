@@ -42,19 +42,31 @@ The Catalog is deployed to GitHub Pages by [`pages.yml`](.github/workflows/pages
 
 ### npm token rotation
 
-Publishing uses the repository secret `NPM_TOKEN`, a granular npm access token with read and write access to the `@grass-ds` packages, exposed to `semantic-release` as `NODE_AUTH_TOKEN` (the `.npmrc` is written by `actions/setup-node` through `registry-url`). npm limits write tokens to 90 days, so rotate it before it expires:
+Publishing uses the repository secret `NPM_TOKEN`, a granular npm access token with read and write access to the `@grass-ds` packages. It is exposed to `semantic-release` as `NODE_AUTH_TOKEN`, and the `.npmrc` that reads it is written by `actions/setup-node` through `registry-url`. npm limits how long write tokens live (90 days at the time of writing; see [About access tokens](https://docs.npmjs.com/about-access-tokens/) for the current rule), so rotate it before it expires:
 
-1. On npmjs.com, create a new granular access token (packages and scopes: `@grass-ds`, permission read and write, 90 days).
+1. On npmjs.com, create a new granular access token with read and write permission on the `@grass-ds` packages and the longest expiry npm allows.
 2. Replace the `NPM_TOKEN` secret under Settings, Secrets and variables, Actions.
 3. Revoke the old token and put the next expiry date in your calendar.
 
-An expired token makes the release job fail at the publish step after the tag may already exist; fix the secret and re-run the failed job.
+A bad or expired token is caught before anything is tagged: `verifyConditionsCmd` in `.releaserc.json` runs `npm whoami` with the same `NODE_AUTH_TOKEN`, so the release job fails at the start and no tag is created.
 
-**January 2027 deadline.** npm is removing direct publishing with tokens that bypass two-factor authentication in January 2027. After that, CI must publish through trusted publishing (OIDC), or through a stage-only token plus `npm stage approve`. The workflow already requests `id-token: write` and publishes with `--provenance`, so moving to trusted publishing is small:
+### Recovering from a failed release
 
-1. Publish each package once with the token so it exists on npm (a trusted publisher can only be attached to an existing package).
-2. On npmjs.com, open each package's settings, add a trusted publisher: GitHub Actions, repository `raphaelmdcoelho/grass-ds`, workflow `release.yml`.
-3. In `release.yml`, remove the `NODE_AUTH_TOKEN` line (keep `registry-url`); npm then exchanges the job's OIDC token for a short-lived publish credential. This needs npm 11.5.1 or newer, which the Node 26 that `.nvmrc` pins ships.
+semantic-release pushes the `vX.Y.Z` tag **before** it publishes. If the job fails after that point (for example a publish error), re-running it does nothing: the tag already exists, so semantic-release sees nothing new to release. Delete the tag first, then re-run the failed job:
+
+```sh
+git push origin :refs/tags/vX.Y.Z
+```
+
+`pnpm -r publish` skips versions that are already on npm, so a partly completed publish (one package out, one not) recovers the same way. If a GitHub release was already created for the tag, delete it as well.
+
+### January 2027: trusted publishing
+
+npm has announced that it removes direct publishing with access tokens in January 2027 (see the [npm documentation](https://docs.npmjs.com/about-access-tokens/) for the exact scope and date). After that, CI has to publish through trusted publishing (OIDC), or through the stage-only token plus `npm stage approve` flow. The release workflow already requests `id-token: write` and publishes with `--provenance`, so the move to [trusted publishing](https://docs.npmjs.com/trusted-publishers/) is small:
+
+1. Follow the npm documentation to add a trusted publisher to each package: provider GitHub Actions, repository `raphaelmdcoelho/grass-ds`, workflow `release.yml`. npm may require the package to exist before one can be configured; if so, publish the first version with the token.
+2. In `release.yml`, remove the `NODE_AUTH_TOKEN` line and keep `registry-url`. npm then exchanges the job's OIDC token for a short-lived publish credential, which needs a recent npm (the documentation states the minimum; the Node 26 pinned in `.nvmrc` ships npm 11).
+3. Replace `verifyConditionsCmd` (`npm whoami` does not work with OIDC) or drop it.
 4. Delete the `NPM_TOKEN` secret and revoke the token.
 
 ## Licence
