@@ -73,73 +73,73 @@
       "50": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.985, 0.0084, 120]
+          "components": [0.985, 0.018, 125]
         }
       },
       "100": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.96, 0.0097, 120]
+          "components": [0.96, 0.018, 125]
         }
       },
       "200": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.93, 0.0111, 120]
+          "components": [0.93, 0.0185, 125]
         }
       },
       "300": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.87, 0.0135, 120]
+          "components": [0.87, 0.0225, 125]
         }
       },
       "400": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.77, 0.0164, 120]
+          "components": [0.77, 0.0273, 125]
         }
       },
       "500": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.67, 0.0178, 120]
+          "components": [0.67, 0.0297, 125]
         }
       },
       "600": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.57, 0.0178, 120]
+          "components": [0.57, 0.0297, 125]
         }
       },
       "700": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.48, 0.0166, 120]
+          "components": [0.48, 0.0276, 125]
         }
       },
       "800": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.39, 0.0142, 120]
+          "components": [0.39, 0.0237, 125]
         }
       },
       "900": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.3, 0.0106, 120]
+          "components": [0.3, 0.018, 125]
         }
       },
       "950": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.21, 0.0059, 120]
+          "components": [0.21, 0.018, 125]
         }
       },
       "975": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.16, 0.0028, 120]
+          "components": [0.16, 0.018, 125]
         }
       }
     },
