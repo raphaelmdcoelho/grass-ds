@@ -1,7 +1,8 @@
 name: Release
 
 # Every merge to main: semantic-release derives the version from the Conventional Commits since the
-# last tag, builds, publishes @grass-ds/tokens and @grass-ds/css to npm and creates the GitHub release.
+# last tag, builds, publishes @grass-ds/tokens, @grass-ds/css and @grass-ds/angular to npm and
+# creates the GitHub release.
 on:
   push:
     branches: [main]
