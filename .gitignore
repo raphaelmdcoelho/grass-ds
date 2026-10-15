@@ -6,6 +6,7 @@ coverage/
 *.tsbuildinfo
 .pnpm-store/
 .env*
+!.env.example
 .DS_Store
 .maestri/
 .claude/settings.local.json

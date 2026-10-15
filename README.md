@@ -23,6 +23,10 @@ pnpm build:catalog
 
 Commits follow Conventional Commits with scopes `tokens|css|angular|catalog|repo|deps|release`.
 
+## Status line
+
+The committed Claude Code status line (`.claude/statusline.sh`) needs `jq` on the PATH.
+
 ## Conventions
 
 - **Themes** switch only through `data-theme="light|dark"` on `<html>` (absent means follow the OS). Scoped themes on a subtree are not supported: component tokens resolve their `var()` references at `:root`.
