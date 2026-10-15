@@ -1,0 +1,48 @@
+name: Release
+
+# Every merge to main: semantic-release derives the version from the Conventional Commits since the
+# last tag, builds, publishes @grass-ds/tokens and @grass-ds/css to npm and creates the GitHub release.
+on:
+  push:
+    branches: [main]
+
+# Publishing must never run twice at once, and a running publish must never be cancelled half-way.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write # push the version tag, create the GitHub release
+  issues: write # comment on released issues
+  pull-requests: write # comment on released pull requests
+  id-token: write # npm provenance (and trusted publishing, see README)
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # semantic-release needs every commit and tag to find the last release
+          # No git credentials are left in .git/config. semantic-release pushes the tag with a URL built
+          # from GITHUB_TOKEN (x-access-token), so the token only exists in the release step's env.
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm check:contrast
+      - run: pnpm test
+      - name: Release
+        run: pnpm exec semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Read by the .npmrc that setup-node writes for registry-url. Provenance is requested by the
+          # --provenance flag in .releaserc.json.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
