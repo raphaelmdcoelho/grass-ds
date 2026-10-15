@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { createDictionary, THEMES } from './lib/dictionary.mjs';
 import { runContrastCheck } from './lib/check.mjs';
 
@@ -76,7 +77,7 @@ export async function build() {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   await build().catch((error) => {
     console.error(error.message);
     process.exit(1);

@@ -1,4 +1,7 @@
-import { parse, wcagContrast } from 'culori';
+import { parse, toGamut, wcagContrast } from 'culori';
+
+// Wide-gamut OKLCH values are measured as the sRGB colour a typical display will actually show.
+const toSrgb = toGamut('rgb');
 
 /**
  * Check every pair against its WCAG threshold.
@@ -19,7 +22,7 @@ export function checkPairs(tokens, { thresholds, pairs }) {
       if (colour.alpha !== undefined && colour.alpha < 1) {
         throw new Error(`"${path}" is translucent; its contrast depends on what is behind it`);
       }
-      return colour;
+      return toSrgb(colour);
     });
     const ratio = wcagContrast(colours[0], colours[1]);
     return { fg, bg, level, ratio, required, pass: ratio >= required };
