@@ -67,7 +67,10 @@
     },
     "focus": {
       "ring": {
-        "$value": "{palette.sky.700}"
+        "$value": "{palette.sky.600}"
+      },
+      "ring-inner": {
+        "$value": "{palette.olive.950}"
       }
     },
     "overlay": {

@@ -1,14 +1,36 @@
 {
   "corner": {
     "$type": "dimension",
-    "sm": { "$value": "0.25rem" },
-    "md": { "$value": "0.5rem", "$description": "8px base corner." },
-    "lg": { "$value": "0.75rem" },
-    "full": { "$value": "9999px" }
+    "sm": {
+      "$value": "0.25rem"
+    },
+    "md": {
+      "$value": "0.5rem"
+    },
+    "lg": {
+      "$value": "0.75rem"
+    },
+    "full": {
+      "$value": "9999px"
+    },
+    "$description": "md is the 8px base corner. "
   },
   "border-width": {
     "$type": "dimension",
-    "thin": { "$value": "1px" },
-    "thick": { "$value": "2px" }
+    "thin": {
+      "$value": "1px"
+    },
+    "thick": {
+      "$value": "2px"
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "container-lg": {
+      "$value": "72rem"
+    },
+    "icon-md": {
+      "$value": "1.25rem"
+    }
   }
 }

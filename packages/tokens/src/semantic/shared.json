@@ -16,7 +16,7 @@
       "$value": "{space.4}"
     },
     "container": {
-      "$value": "72rem"
+      "$value": "{size.container-lg}"
     },
     "inset": {
       "tight": {
@@ -155,6 +155,12 @@
     "overlay": {
       "$type": "shadow",
       "$value": "{shadow.soft}"
+    }
+  },
+  "control": {
+    "indicator-size": {
+      "$type": "dimension",
+      "$value": "{size.icon-md}"
     }
   }
 }

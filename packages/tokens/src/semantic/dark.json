@@ -36,7 +36,7 @@
           "$value": "{palette.grass.300}"
         },
         "background-active": {
-          "$value": "{palette.grass.500}"
+          "$value": "{palette.grass.200}"
         },
         "foreground": {
           "$value": "{palette.olive.975}"
@@ -47,10 +47,10 @@
           "$value": "{palette.olive.800}"
         },
         "background-hover": {
-          "$value": "{palette.olive.700}"
+          "$value": "{palette.olive.900}"
         },
         "background-active": {
-          "$value": "{palette.olive.900}"
+          "$value": "{palette.olive.950}"
         },
         "foreground": {
           "$value": "{palette.olive.50}"
@@ -68,6 +68,9 @@
     "focus": {
       "ring": {
         "$value": "{palette.sky.300}"
+      },
+      "ring-inner": {
+        "$value": "{palette.olive.975}"
       }
     },
     "overlay": {
