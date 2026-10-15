@@ -1,0 +1,24 @@
+{
+  "shadow": {
+    "$type": "shadow",
+    "$description": "Depth is mostly flat; shadows are reserved for overlays.",
+    "soft": {
+      "$value": [
+        {
+          "color": "oklch(0 0 0 / 0.08)",
+          "offsetX": "0",
+          "offsetY": "2px",
+          "blur": "6px",
+          "spread": "0"
+        },
+        {
+          "color": "oklch(0 0 0 / 0.12)",
+          "offsetX": "0",
+          "offsetY": "12px",
+          "blur": "32px",
+          "spread": "-4px"
+        }
+      ]
+    }
+  }
+}

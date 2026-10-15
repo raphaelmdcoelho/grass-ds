@@ -1,0 +1,14 @@
+{
+  "corner": {
+    "$type": "dimension",
+    "sm": { "$value": "0.25rem" },
+    "md": { "$value": "0.5rem", "$description": "8px base corner." },
+    "lg": { "$value": "0.75rem" },
+    "full": { "$value": "9999px" }
+  },
+  "border-width": {
+    "$type": "dimension",
+    "thin": { "$value": "1px" },
+    "thick": { "$value": "2px" }
+  }
+}
