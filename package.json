@@ -18,7 +18,7 @@
     "build": "pnpm -r run build",
     "test": "pnpm -r --if-present run test",
     "check:contrast": "pnpm --filter @grass-ds/tokens run check:contrast",
-    "build:catalog": "pnpm --filter @grass-ds/catalog-reference run build",
+    "build:catalog": "pnpm --filter @grass-ds/catalog-reference run build-storybook",
     "storybook": "pnpm --filter @grass-ds/catalog-reference run storybook",
     "lint": "pnpm run lint:js && pnpm run lint:css && pnpm run format:check",
     "lint:js": "eslint .",
