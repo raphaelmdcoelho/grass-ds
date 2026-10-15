@@ -1,0 +1,92 @@
+/*
+ * Button. Markup contract: <button class="gr-button"> or <a class="gr-button" href>.
+ * data-variant="primary|secondary|danger" (primary when absent); disabled via the native
+ * `disabled` attribute on <button> or aria-disabled="true" on anything (which stays focusable).
+ */
+@layer grass.components {
+  .gr-button {
+    --gr-button-current-background: var(--gr-button-primary-background);
+    --gr-button-current-background-hover: var(--gr-button-primary-background-hover);
+    --gr-button-current-background-active: var(--gr-button-primary-background-active);
+    --gr-button-current-foreground: var(--gr-button-primary-foreground);
+    --gr-button-current-border: transparent;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gr-button-gap);
+    padding: var(--gr-button-padding-block) var(--gr-button-padding-inline);
+    border: var(--gr-border-width) solid var(--gr-button-current-border);
+    border-radius: var(--gr-button-radius);
+    background-color: var(--gr-button-current-background);
+    color: var(--gr-button-current-foreground);
+    font-family: inherit;
+    font-size: var(--gr-text-size-body);
+    font-weight: var(--gr-button-font-weight);
+    line-height: var(--gr-text-line-height-body);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+
+    /* Compose, never replace: the focus ring's inner band is part of this shadow. */
+    box-shadow: var(--gr-focus-inner);
+
+    /* Durations collapse to 0ms under prefers-reduced-motion (tokens.css), which stops this. */
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--gr-button-transition-duration);
+    transition-timing-function: var(--gr-motion-easing-default);
+
+    &:hover {
+      background-color: var(--gr-button-current-background-hover);
+    }
+
+    &:active {
+      background-color: var(--gr-button-current-background-active);
+    }
+
+    /* Anchors keep the band too: base drops it on plain links only. */
+    &:focus-visible {
+      --gr-focus-inner: var(--gr-focus-band);
+    }
+
+    &[data-variant='secondary'] {
+      --gr-button-current-background: var(--gr-button-secondary-background);
+      --gr-button-current-background-hover: var(--gr-button-secondary-background-hover);
+      --gr-button-current-background-active: var(--gr-button-secondary-background-active);
+      --gr-button-current-foreground: var(--gr-button-secondary-foreground);
+      --gr-button-current-border: var(--gr-button-secondary-border);
+    }
+
+    &[data-variant='danger'] {
+      --gr-button-current-background: var(--gr-button-danger-background);
+      --gr-button-current-background-hover: var(--gr-button-danger-background-hover);
+      --gr-button-current-background-active: var(--gr-button-danger-background-active);
+      --gr-button-current-foreground: var(--gr-button-danger-foreground);
+    }
+
+    /* Last, so it beats the variants and states above at equal specificity. */
+    &:disabled,
+    &[aria-disabled='true'] {
+      --gr-button-current-background: var(--gr-button-disabled-background);
+      --gr-button-current-background-hover: var(--gr-button-disabled-background);
+      --gr-button-current-background-active: var(--gr-button-disabled-background);
+      --gr-button-current-foreground: var(--gr-button-disabled-foreground);
+      --gr-button-current-border: var(--gr-button-disabled-border);
+
+      cursor: not-allowed;
+    }
+
+    @media (forced-colors: active) {
+      /* Fills are dropped in forced colours, so the border (transparent otherwise) carries the shape. */
+      --gr-button-current-border: ButtonText;
+
+      &:disabled,
+      &[aria-disabled='true'] {
+        --gr-button-current-foreground: GrayText;
+        --gr-button-current-border: GrayText;
+      }
+    }
+  }
+}

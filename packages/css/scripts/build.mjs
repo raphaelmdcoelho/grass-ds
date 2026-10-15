@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 const here = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url));
 
 /** Order matters: it is the source order inside the shared layers. */
-export const PARTS = ['layers', 'reset', 'base', 'layout', 'utilities'];
+export const PARTS = ['layers', 'reset', 'base', 'layout', 'button', 'utilities'];
 
 export async function buildCss() {
   const parts = await Promise.all(PARTS.map((name) => readFile(here(`src/${name}.css`), 'utf8')));

@@ -101,3 +101,18 @@ test('the focus band is transparent unless the element itself is focused', () =>
   });
   assert.deepEqual(resets, ['0 0 0 0 transparent']);
 });
+
+test('Button supports variants, disabled and aria-disabled, forced colours and keyboard focus', () => {
+  assert.match(css, /\.gr-button\b/);
+  for (const variant of ['secondary', 'danger'])
+    assert.match(css, new RegExp(`\\[data-variant=["']${variant}["']\\]`));
+  assert.match(css, /&:disabled,\s*&\[aria-disabled=["']true["']\]/);
+  assert.match(css, /@media \(forced-colors: active\)/);
+  assert.match(css, /&:focus-visible/);
+});
+
+test('Button disabled styles come after the variants so they win at equal specificity', () => {
+  const at = (needle) => css.indexOf(needle);
+  assert.ok(at('&:disabled,') > at("&[data-variant='danger']"));
+  assert.ok(at('&:disabled,') > at('&:active'));
+});
