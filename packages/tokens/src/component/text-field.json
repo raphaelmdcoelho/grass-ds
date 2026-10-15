@@ -1,0 +1,14 @@
+{
+  "text-field": {
+    "$type": "color",
+    "background": { "$value": "{color.surface.raised}" },
+    "foreground": { "$value": "{color.text.default}" },
+    "placeholder": { "$value": "{color.text.muted}" },
+    "border": { "$value": "{color.border.strong}" },
+    "border-focus": { "$value": "{color.focus.ring}" },
+    "border-invalid": { "$value": "{color.feedback.danger.text}" },
+    "radius": { "$type": "dimension", "$value": "{radius.control}" },
+    "padding-block": { "$type": "dimension", "$value": "{layout.inset.tight}" },
+    "padding-inline": { "$type": "dimension", "$value": "{layout.inset.default}" }
+  }
+}

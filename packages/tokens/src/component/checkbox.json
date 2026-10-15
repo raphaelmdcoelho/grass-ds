@@ -1,0 +1,10 @@
+{
+  "checkbox": {
+    "size": { "$type": "dimension", "$value": "1.25rem" },
+    "radius": { "$type": "dimension", "$value": "{radius.small}" },
+    "background": { "$type": "color", "$value": "{color.surface.raised}" },
+    "border": { "$type": "color", "$value": "{color.border.strong}" },
+    "background-checked": { "$type": "color", "$value": "{color.action.primary.background}" },
+    "foreground-checked": { "$type": "color", "$value": "{color.action.primary.foreground}" }
+  }
+}
