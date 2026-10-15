@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": []
+  },
+  "angularCompilerOptions": { "strictTemplates": true },
+  "include": ["src/**/*.ts", ".storybook/**/*.ts"]
+}

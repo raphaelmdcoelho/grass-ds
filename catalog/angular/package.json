@@ -1,0 +1,30 @@
+{
+  "name": "@grass-ds/catalog-angular",
+  "private": true,
+  "version": "0.0.0-development",
+  "description": "Angular Storybook: the @grass-ds/angular components, mirroring the Reference stories.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "storybook": "ng run catalog-angular:storybook",
+    "build-storybook": "ng run catalog-angular:build-storybook"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^22.2.3",
+    "@angular/cli": "^22.2.3",
+    "@angular/common": "^22.2.3",
+    "@angular/compiler": "^22.2.3",
+    "@angular/compiler-cli": "^22.2.3",
+    "@angular/core": "^22.2.3",
+    "@angular/platform-browser": "^22.2.3",
+    "@angular/platform-browser-dynamic": "^22.2.3",
+    "@grass-ds/angular": "workspace:*",
+    "@grass-ds/css": "workspace:*",
+    "@grass-ds/tokens": "workspace:*",
+    "@storybook/addon-a11y": "^10.6.2",
+    "@storybook/angular": "^10.6.2",
+    "rxjs": "^7.8.2",
+    "storybook": "^10.6.2",
+    "typescript": "~6.0.3"
+  }
+}
