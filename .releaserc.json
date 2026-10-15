@@ -7,7 +7,7 @@
       "@semantic-release/exec",
       {
         "verifyConditionsCmd": "npm whoami",
-        "prepareCmd": "pnpm build && pnpm -r exec npm pkg set version=${nextRelease.version}",
+        "prepareCmd": "pnpm -r exec npm pkg set version=${nextRelease.version} && pnpm build",
         "publishCmd": "pnpm -r publish --access public --provenance --no-git-checks"
       }
     ],
