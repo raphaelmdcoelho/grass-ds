@@ -8,7 +8,15 @@
 
     inline-size: min(100% - 2 * var(--gr-container-gutter), var(--gr-layout-container));
     margin-inline: auto;
-    container-type: inline-size;
+
+    /*
+     * Opt in with data-query when children use @container queries. Size containment
+     * makes the element a containing block for position: fixed descendants and creates a
+     * stacking context, so it is off by default.
+     */
+    &[data-query] {
+      container-type: inline-size;
+    }
   }
 
   /* Vertical rhythm between direct children. */
