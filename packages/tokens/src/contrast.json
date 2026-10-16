@@ -240,6 +240,31 @@
       "fg": "color.action.disabled.foreground",
       "bg": "color.surface.sunken",
       "level": "ui"
+    },
+    {
+      "fg": "color.border.strong-hover",
+      "bg": "color.surface.default",
+      "level": "ui"
+    },
+    {
+      "fg": "color.border.strong-hover",
+      "bg": "color.surface.raised",
+      "level": "ui"
+    },
+    {
+      "fg": "color.border.strong-hover",
+      "bg": "color.surface.sunken",
+      "level": "ui"
+    },
+    {
+      "fg": "color.feedback.danger.text",
+      "bg": "color.surface.default",
+      "level": "text"
+    },
+    {
+      "fg": "color.feedback.danger.text",
+      "bg": "color.surface.sunken",
+      "level": "text"
     }
   ]
 }

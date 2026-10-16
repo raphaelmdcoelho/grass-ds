@@ -1,14 +1,70 @@
 {
   "text-field": {
     "$type": "color",
-    "background": { "$value": "{color.surface.raised}" },
-    "foreground": { "$value": "{color.text.default}" },
-    "placeholder": { "$value": "{color.text.muted}" },
-    "border": { "$value": "{color.border.strong}" },
-    "border-focus": { "$value": "{color.focus.ring}" },
-    "border-invalid": { "$value": "{color.feedback.danger.text}" },
-    "radius": { "$type": "dimension", "$value": "{radius.control}" },
-    "padding-block": { "$type": "dimension", "$value": "{layout.inset.tight}" },
-    "padding-inline": { "$type": "dimension", "$value": "{layout.inset.default}" }
+    "background": {
+      "$value": "{color.surface.raised}"
+    },
+    "foreground": {
+      "$value": "{color.text.default}"
+    },
+    "placeholder": {
+      "$value": "{color.text.muted}"
+    },
+    "border": {
+      "$value": "{color.border.strong}"
+    },
+    "border-hover": {
+      "$value": "{color.border.strong-hover}"
+    },
+    "border-focus": {
+      "$value": "{color.focus.ring}"
+    },
+    "border-invalid": {
+      "$value": "{color.feedback.danger.text}"
+    },
+    "background-disabled": {
+      "$value": "{color.action.disabled.background}"
+    },
+    "foreground-disabled": {
+      "$value": "{color.action.disabled.foreground}"
+    },
+    "border-disabled": {
+      "$value": "{color.action.disabled.border}"
+    },
+    "background-read-only": {
+      "$value": "{color.surface.sunken}"
+    },
+    "border-read-only": {
+      "$value": "{color.border.strong}"
+    },
+    "label": {
+      "$value": "{color.text.default}"
+    },
+    "hint": {
+      "$value": "{color.text.muted}"
+    },
+    "error": {
+      "$value": "{color.feedback.danger.text}"
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "{radius.control}"
+    },
+    "padding-block": {
+      "$type": "dimension",
+      "$value": "{layout.inset.tight}"
+    },
+    "padding-inline": {
+      "$type": "dimension",
+      "$value": "{layout.inset.default}"
+    },
+    "gap": {
+      "$type": "dimension",
+      "$value": "{layout.gap.tight}"
+    },
+    "transition-duration": {
+      "$type": "duration",
+      "$value": "{motion.duration.fast}"
+    }
   }
 }
