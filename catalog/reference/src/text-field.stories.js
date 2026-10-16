@@ -111,6 +111,34 @@ export const Types = {
     ),
 };
 
+/**
+ * An error that appears after the page loaded (here, on blur) is only announced if its element is
+ * inserted with role="alert". A pre-rendered error (see "Invalid with error") must not have one.
+ */
+export const DynamicError = {
+  name: 'Error added on blur',
+  render: () =>
+    page(
+      '<p class="catalog-note">Focus the field and leave it empty: the error is added and announced.</p>',
+      field({ id: 'dynamic', label: 'Full name', attrs: 'type="text"' }),
+    ),
+  play: ({ canvasElement }) => {
+    const input = canvasElement.querySelector('#dynamic');
+    input.addEventListener('blur', () => {
+      const error = canvasElement.querySelector('#dynamic-error');
+      if (input.value) return error?.remove();
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-describedby', 'dynamic-error');
+      if (!error) {
+        input.insertAdjacentHTML(
+          'afterend',
+          '<p class="gr-field__error" id="dynamic-error" role="alert">Enter your name.</p>',
+        );
+      }
+    });
+  },
+};
+
 /** Tab onto the field so the keyboard focus ring (outer ring plus inner band) is on show. */
 export const KeyboardFocus = {
   name: 'Keyboard focus',

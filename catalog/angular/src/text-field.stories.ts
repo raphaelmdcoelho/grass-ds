@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/angular';
+import { signal } from '@angular/core';
 import { userEvent } from 'storybook/test';
 import { GrTextField } from '@grass-ds/angular/text-field';
 
@@ -127,6 +128,32 @@ export const Types: Story = {
         attrs: 'placeholder="Tell us more"',
       }),
     ),
+};
+
+/**
+ * An error that appears after the page loaded (here, on blur) is only announced if its element is
+ * inserted with role="alert". A pre-rendered error (see "Invalid with error") must not have one.
+ */
+export const DynamicError: Story = {
+  name: 'Error added on blur',
+  render: () => ({
+    moduleMetadata: { imports: [GrTextField] },
+    props: { touched: signal(false), empty: signal(true) },
+    template: `<div class="catalog-page gr-stack" data-gap="loose" style="max-inline-size: 28rem">
+      <p class="catalog-note">Focus the field and leave it empty: the error is added and announced.</p>
+      <div class="gr-field">
+        <label class="gr-field__label" for="dynamic">Full name</label>
+        <input grTextField id="dynamic" type="text"
+          [grInvalid]="touched() && empty()"
+          [attr.aria-describedby]="touched() && empty() ? 'dynamic-error' : null"
+          (input)="empty.set(!$any($event.target).value)"
+          (blur)="touched.set(true); empty.set(!$any($event.target).value)" />
+        @if (touched() && empty()) {
+          <p class="gr-field__error" id="dynamic-error" role="alert">Enter your name.</p>
+        }
+      </div>
+    </div>`,
+  }),
 };
 
 /** Tab onto the field so the keyboard focus ring (outer ring plus inner band) is on show. */
