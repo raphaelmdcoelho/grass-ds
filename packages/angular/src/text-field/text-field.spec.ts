@@ -1,0 +1,126 @@
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { GrTextField } from './text-field';
+
+@Component({
+  imports: [GrTextField, FormsModule, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <input grTextField id="plain" />
+    <input grTextField id="flag" [invalid]="flag()" />
+    <input grTextField id="static" aria-invalid="true" />
+    <textarea grTextField id="area"></textarea>
+    <input grTextField id="reactive" [formControl]="reactive" />
+    <input grTextField id="template" required [(ngModel)]="model" />
+  `,
+})
+class Host {
+  readonly flag = signal(false);
+  readonly reactive = new FormControl('', { nonNullable: true, validators: Validators.required });
+  model = '';
+}
+
+async function setup() {
+  const fixture = TestBed.createComponent(Host);
+  await fixture.whenStable();
+  const root: HTMLElement = fixture.nativeElement;
+  const get = <T extends HTMLElement = HTMLInputElement>(id: string) =>
+    root.querySelector<T>(`#${id}`)!;
+  const settle = async () => {
+    fixture.changeDetectorRef.markForCheck();
+    await fixture.whenStable();
+  };
+  return { fixture, host: fixture.componentInstance, get, settle };
+}
+
+describe('GrTextField', () => {
+  it('renders the .gr-text-field markup contract on input and textarea, with no aria-invalid', async () => {
+    const { get } = await setup();
+    for (const id of ['plain', 'area']) {
+      expect(get(id).classList.contains('gr-text-field')).toBe(true);
+      expect(get(id).hasAttribute('aria-invalid')).toBe(false);
+    }
+    expect(get('area').localName).toBe('textarea');
+  });
+
+  it('reflects the invalid input as aria-invalid="true" and removes it again', async () => {
+    const { get, host, settle } = await setup();
+    host.flag.set(true);
+    await settle();
+    expect(get('flag').getAttribute('aria-invalid')).toBe('true');
+    host.flag.set(false);
+    await settle();
+    expect(get('flag').hasAttribute('aria-invalid')).toBe(false);
+  });
+
+  it('keeps an aria-invalid written in the template', async () => {
+    const { get } = await setup();
+    expect(get('static').getAttribute('aria-invalid')).toBe('true');
+  });
+
+  describe('reactive forms', () => {
+    it('reads and writes the value with no ControlValueAccessor of our own', async () => {
+      const { get, host, settle } = await setup();
+      const input = get('reactive');
+      input.value = 'hello';
+      input.dispatchEvent(new Event('input'));
+      expect(host.reactive.value).toBe('hello');
+      host.reactive.setValue('from the model');
+      await settle();
+      expect(input.value).toBe('from the model');
+    });
+
+    it('flags an invalid control only once it is touched', async () => {
+      const { get, host, settle } = await setup();
+      const input = get('reactive');
+      expect(host.reactive.invalid).toBe(true);
+      expect(input.hasAttribute('aria-invalid')).toBe(false);
+      input.dispatchEvent(new Event('blur'));
+      await settle();
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+      input.value = 'ok';
+      input.dispatchEvent(new Event('input'));
+      await settle();
+      expect(input.hasAttribute('aria-invalid')).toBe(false);
+    });
+
+    it('also flags when the form marks everything touched (a submit attempt)', async () => {
+      const { get, host, settle } = await setup();
+      host.reactive.markAsTouched();
+      await settle();
+      expect(get('reactive').getAttribute('aria-invalid')).toBe('true');
+    });
+
+    it('is disabled through the control', async () => {
+      const { get, host, settle } = await setup();
+      host.reactive.disable();
+      await settle();
+      expect(get('reactive').disabled).toBe(true);
+    });
+  });
+
+  describe('template-driven forms', () => {
+    it('binds ngModel in both directions', async () => {
+      const { fixture, get, host } = await setup();
+      const input = get('template');
+      input.value = 'typed';
+      input.dispatchEvent(new Event('input'));
+      expect(host.model).toBe('typed');
+      host.model = 'set by the model';
+      fixture.changeDetectorRef.markForCheck();
+      await fixture.whenStable();
+      await fixture.whenStable();
+      expect(input.value).toBe('set by the model');
+    });
+
+    it('flags a required field once it is touched and empty', async () => {
+      const { get, settle } = await setup();
+      const input = get('template');
+      expect(input.hasAttribute('aria-invalid')).toBe(false);
+      input.dispatchEvent(new Event('blur'));
+      await settle();
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+    });
+  });
+});
