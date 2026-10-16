@@ -70,7 +70,7 @@ export const Invalid: Story = {
         label: 'Email',
         hint: 'We only use it to sign you in.',
         error: 'Enter an address like name@example.com.',
-        attrs: 'type="email" value="ada@" grInvalid',
+        attrs: 'type="email" value="ada@" spellcheck="false" grInvalid',
       }),
     ),
 };
@@ -167,7 +167,7 @@ export const KeyboardFocus: Story = {
         id: 'focus-invalid',
         label: 'Email',
         error: 'Enter an address like name@example.com.',
-        attrs: 'type="email" value="ada@" grInvalid',
+        attrs: 'type="email" value="ada@" spellcheck="false" grInvalid',
       }),
     ),
   play: async () => {

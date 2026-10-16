@@ -51,7 +51,7 @@ export const Invalid = {
         label: 'Email',
         hint: 'We only use it to sign you in.',
         error: 'Enter an address like name@example.com.',
-        attrs: 'type="email" value="ada@" aria-invalid="true"',
+        attrs: 'type="email" value="ada@" spellcheck="false" aria-invalid="true"',
       }),
     ),
 };
@@ -150,7 +150,7 @@ export const KeyboardFocus = {
         id: 'focus-invalid',
         label: 'Email',
         error: 'Enter an address like name@example.com.',
-        attrs: 'type="email" value="ada@" aria-invalid="true"',
+        attrs: 'type="email" value="ada@" spellcheck="false" aria-invalid="true"',
       }),
     ),
   play: async () => {
