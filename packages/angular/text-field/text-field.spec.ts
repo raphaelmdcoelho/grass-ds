@@ -1,17 +1,25 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { form, FormField, required } from '@angular/forms/signals';
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GrTextField } from './text-field';
 
 @Component({
-  imports: [GrTextField, FormsModule, ReactiveFormsModule],
+  imports: [GrTextField, FormsModule, ReactiveFormsModule, FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <input grTextField id="plain" />
-    <input grTextField id="flag" [invalid]="flag()" />
+    <input grTextField id="flag" [grInvalid]="flag()" />
     <input grTextField id="static" aria-invalid="true" />
     <textarea grTextField id="area"></textarea>
     <input grTextField id="reactive" [formControl]="reactive" />
+    <input grTextField id="signal" [formField]="signalForm.name" />
+    <input
+      grTextField
+      id="signal-driven"
+      [formField]="signalForm.name"
+      [grInvalid]="signalForm.name().invalid() && signalForm.name().touched()"
+    />
     <input grTextField id="template" required [(ngModel)]="model" />
   `,
 })
@@ -19,6 +27,8 @@ class Host {
   readonly flag = signal(false);
   readonly reactive = new FormControl('', { nonNullable: true, validators: Validators.required });
   model = '';
+  readonly signalModel = signal({ name: '' });
+  readonly signalForm = form(this.signalModel, (path) => required(path.name));
 }
 
 async function setup() {
@@ -44,7 +54,7 @@ describe('GrTextField', () => {
     expect(get('area').localName).toBe('textarea');
   });
 
-  it('reflects the invalid input as aria-invalid="true" and removes it again', async () => {
+  it('reflects the grInvalid input as aria-invalid="true" and removes it again', async () => {
     const { get, host, settle } = await setup();
     host.flag.set(true);
     await settle();
@@ -97,6 +107,39 @@ describe('GrTextField', () => {
       host.reactive.disable();
       await settle();
       expect(get('reactive').disabled).toBe(true);
+    });
+  });
+
+  describe('Signal Forms', () => {
+    it('does not write its invalid state into aria-invalid before the field is touched', async () => {
+      const { get, host } = await setup();
+      expect(host.signalForm.name().invalid()).toBe(true);
+      expect(get('signal').hasAttribute('aria-invalid')).toBe(false);
+      expect(get('signal-driven').hasAttribute('aria-invalid')).toBe(false);
+    });
+
+    it('binds the value in both directions', async () => {
+      const { get, host, settle } = await setup();
+      const input = get('signal');
+      input.value = 'typed';
+      input.dispatchEvent(new Event('input'));
+      expect(host.signalModel().name).toBe('typed');
+      host.signalModel.set({ name: 'from the model' });
+      await settle();
+      expect(input.value).toBe('from the model');
+    });
+
+    it('shows invalid once the field is touched when grInvalid is driven from the field state', async () => {
+      const { get, host, settle } = await setup();
+      const input = get('signal-driven');
+      input.dispatchEvent(new Event('blur'));
+      await settle();
+      expect(host.signalForm.name().touched()).toBe(true);
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+      input.value = 'ok';
+      input.dispatchEvent(new Event('input'));
+      await settle();
+      expect(input.hasAttribute('aria-invalid')).toBe(false);
     });
   });
 

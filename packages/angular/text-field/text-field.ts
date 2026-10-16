@@ -34,10 +34,12 @@ import { NgControl } from '@angular/forms';
 export class GrTextField {
   /**
    * Marks the field invalid (`aria-invalid="true"`), which the CSS styles. Use it for errors the
-   * form does not know about (a server message) or to show the error before the field is touched.
+   * form does not know about (a server message), to show the error before the field is touched, or
+   * to drive it from Signal Forms. Named `grInvalid`, not `invalid`, because Signal Forms
+   * (`[formField]`) write their own `invalid` into a host input of that name, touched or not.
    * Do not bind `[attr.aria-invalid]` on the same element: this input owns the attribute.
    */
-  readonly invalid = input(false, { transform: booleanAttribute });
+  readonly grInvalid = input(false, { transform: booleanAttribute });
 
   // Present when the element also carries ngModel / formControl / formControlName.
   private readonly control = inject(NgControl, { optional: true, self: true });
@@ -52,7 +54,7 @@ export class GrTextField {
    * `aria-invalid` the template wrote statically is kept.
    */
   protected ariaInvalid(): string | null {
-    if (this.invalid() || (this.control?.touched && this.control.invalid)) return 'true';
+    if (this.grInvalid() || (this.control?.touched && this.control.invalid)) return 'true';
     return this.authoredAriaInvalid;
   }
 }

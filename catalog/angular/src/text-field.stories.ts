@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { userEvent } from 'storybook/test';
-import { GrTextField } from '@grass-ds/angular';
+import { GrTextField } from '@grass-ds/angular/text-field';
 
 // Mirrors catalog/reference/src/text-field.stories.js: same title, story names and visible output.
 const meta: Meta = {
@@ -20,7 +20,7 @@ interface FieldOptions {
   tag?: 'input' | 'textarea';
 }
 
-// The Angular side of the same contract: the directive adds the class, `invalid` adds aria-invalid.
+// The Angular side of the same contract: the directive adds the class, `grInvalid` adds aria-invalid.
 const field = ({ id, label, hint, error, attrs = '', tag = 'input' }: FieldOptions) => {
   const describedby = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ');
   const describedAttr = describedby ? `aria-describedby="${describedby}"` : '';
@@ -69,7 +69,7 @@ export const Invalid: Story = {
         label: 'Email',
         hint: 'We only use it to sign you in.',
         error: 'Enter an address like name@example.com.',
-        attrs: 'type="email" value="ada@" invalid',
+        attrs: 'type="email" value="ada@" grInvalid',
       }),
     ),
 };
@@ -140,7 +140,7 @@ export const KeyboardFocus: Story = {
         id: 'focus-invalid',
         label: 'Email',
         error: 'Enter an address like name@example.com.',
-        attrs: 'type="email" value="ada@" invalid',
+        attrs: 'type="email" value="ada@" grInvalid',
       }),
     ),
   play: async () => {
