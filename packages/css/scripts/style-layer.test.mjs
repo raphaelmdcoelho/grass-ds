@@ -116,3 +116,21 @@ test('Button disabled styles come after the variants so they win at equal specif
   assert.ok(at('&:disabled,') > at("&[data-variant='danger']"));
   assert.ok(at('&:disabled,') > at('&:active'));
 });
+
+test('TextField covers the field wrapper, states, textarea and forced colours', () => {
+  for (const name of ['gr-field', 'gr-field__label', 'gr-field__hint', 'gr-field__error'])
+    assert.match(css, new RegExp(`\\.${name}\\b`));
+  assert.match(css, /\.gr-text-field\b/);
+  assert.match(css, /&\[aria-invalid=["']true["']\]/);
+  assert.match(css, /&\[readonly\]/);
+  assert.match(css, /&:disabled/);
+  assert.match(css, /&:is\(textarea\)/);
+  assert.match(css, /@media \(forced-colors: active\)/);
+});
+
+test('TextField disabled and read-only styles come after hover and focus so they win', () => {
+  const at = (needle) => css.lastIndexOf(needle);
+  assert.ok(at('&:disabled {') > at('&[readonly]'));
+  assert.ok(at('&[readonly]') > at('&:focus-visible'));
+  assert.ok(at('&:focus-visible') > at('&:hover'));
+});

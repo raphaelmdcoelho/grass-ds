@@ -1,0 +1,128 @@
+/*
+ * TextField. Markup contract:
+ *
+ *   <div class="gr-field">
+ *     <label class="gr-field__label" for="email">Email</label>
+ *     <p class="gr-field__hint" id="email-hint">We only use it to sign you in.</p>
+ *     <input class="gr-text-field" id="email" type="email"
+ *            aria-describedby="email-hint email-error" aria-invalid="true" />
+ *     <p class="gr-field__error" id="email-error">Enter an address like name@example.com.</p>
+ *   </div>
+ *
+ * .gr-text-field goes on <input> (text, email, password, search, url, tel, number) or <textarea>.
+ * Invalid is aria-invalid="true" (set by the application, so it is also what assistive technology
+ * hears); disabled and read-only are the native attributes. The label is required and the hint and
+ * error are connected with aria-describedby; the wrapper only lays them out.
+ */
+@layer grass.components {
+  .gr-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gr-text-field-gap);
+  }
+
+  .gr-field__label {
+    color: var(--gr-text-field-label);
+    font-size: var(--gr-text-size-body);
+    font-weight: var(--gr-text-weight-emphasis);
+    line-height: var(--gr-text-line-height-body);
+  }
+
+  .gr-field__hint,
+  .gr-field__error {
+    margin: 0;
+    font-size: var(--gr-text-size-small);
+    line-height: var(--gr-text-line-height-body);
+  }
+
+  .gr-field__hint {
+    color: var(--gr-text-field-hint);
+  }
+
+  .gr-field__error {
+    color: var(--gr-text-field-error);
+    font-weight: var(--gr-text-weight-emphasis);
+  }
+
+  .gr-text-field {
+    --gr-text-field-current-background: var(--gr-text-field-background);
+    --gr-text-field-current-foreground: var(--gr-text-field-foreground);
+    --gr-text-field-current-placeholder: var(--gr-text-field-placeholder);
+    --gr-text-field-current-border: var(--gr-text-field-border);
+
+    /* A second, inner edge: invalid is not told by colour alone (WCAG 1.4.1). */
+    --gr-text-field-current-edge: 0 0 0 0 transparent;
+
+    display: block;
+    inline-size: 100%;
+    padding: var(--gr-text-field-padding-block) var(--gr-text-field-padding-inline);
+    border: var(--gr-border-width) solid var(--gr-text-field-current-border);
+    border-radius: var(--gr-text-field-radius);
+    background-color: var(--gr-text-field-current-background);
+    color: var(--gr-text-field-current-foreground);
+    font-family: inherit;
+    font-size: var(--gr-text-size-body);
+    line-height: var(--gr-text-line-height-body);
+    appearance: none;
+
+    /* Compose, never replace: the focus ring's inner band is part of this shadow. */
+    box-shadow: var(--gr-focus-inner), var(--gr-text-field-current-edge);
+
+    /* Durations collapse to 0ms under prefers-reduced-motion (tokens.css), which stops this. */
+    transition-property: background-color, border-color, box-shadow;
+    transition-duration: var(--gr-text-field-transition-duration);
+    transition-timing-function: var(--gr-motion-easing-default);
+
+    &:is(textarea) {
+      min-block-size: calc(3lh + 2 * var(--gr-text-field-padding-block));
+      resize: vertical;
+    }
+
+    &::placeholder {
+      color: var(--gr-text-field-current-placeholder);
+      opacity: 1; /* Firefox dims placeholders by default, which would undo the contrast pairing. */
+    }
+
+    &:hover {
+      --gr-text-field-current-border: var(--gr-text-field-border-hover);
+    }
+
+    &:focus-visible {
+      --gr-focus-inner: var(--gr-focus-band);
+      --gr-text-field-current-border: var(--gr-text-field-border-focus);
+    }
+
+    &[aria-invalid='true'] {
+      --gr-text-field-current-border: var(--gr-text-field-border-invalid);
+      --gr-text-field-current-edge: inset 0 0 0 var(--gr-border-width)
+        var(--gr-text-field-border-invalid);
+    }
+
+    &[readonly] {
+      --gr-text-field-current-background: var(--gr-text-field-background-read-only);
+      --gr-text-field-current-border: var(--gr-text-field-border-read-only);
+    }
+
+    /* Last, so it beats the states above at equal specificity. */
+    &:disabled {
+      --gr-text-field-current-background: var(--gr-text-field-background-disabled);
+      --gr-text-field-current-foreground: var(--gr-text-field-foreground-disabled);
+      --gr-text-field-current-placeholder: var(--gr-text-field-foreground-disabled);
+      --gr-text-field-current-border: var(--gr-text-field-border-disabled);
+      --gr-text-field-current-edge: 0 0 0 0 transparent;
+
+      cursor: not-allowed;
+    }
+
+    @media (forced-colors: active) {
+      /* Fills and shadows are dropped in forced colours: the border (system colours) carries the shape. */
+      --gr-text-field-current-border: FieldText;
+
+      &:disabled {
+        --gr-text-field-current-foreground: GrayText;
+        --gr-text-field-current-placeholder: GrayText;
+        --gr-text-field-current-border: GrayText;
+      }
+    }
+  }
+}
