@@ -50,7 +50,9 @@ Variants and states are expressed with data and ARIA attributes (`data-variant`,
 - **The label is required** and tied to the control with `for`/`id`. A placeholder is not a label.
 - **Hint and error** are optional. Give each an `id` and list them in the control's `aria-describedby` (omit the error id while there is no error), so a screen reader reads them with the field. The wrapper only lays them out.
 - **Invalid** is `aria-invalid="true"`, set by your application together with the error message. The CSS deliberately does not use `:user-invalid`: it would colour a field that assistive technology was never told was invalid. Invalid is also shown by an inner edge, not by colour alone.
-- **Disabled and read-only** are the native `disabled` and `readonly` attributes.
+- **Announce a dynamic error.** An error added after the page loaded (on blur, on submit) is announced only if its element is a live region: insert it with `role="alert"` (and set `aria-invalid` and the `aria-describedby` entry at the same time). An error that is already in the markup on load must **not** have `role="alert"`.
+- **Disabled and read-only** are the native `disabled` and `readonly` attributes. A read-only field that is also invalid shows the invalid border.
+- **Forced colours**: fills are dropped, so invalid gets a thicker border and read-only a dashed one. Autofilled fields keep the theme's colours.
 
 ## Theming
 
