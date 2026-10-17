@@ -54,6 +54,14 @@ _Avoid_: Form group, input wrapper, form row
 A fieldset with a legend that names several related fields (a set of checkboxes), laid out by `.gr-field-group`. The legend is its label.
 _Avoid_: Checkbox group, fieldset wrapper, section
 
+**Composite**:
+A component with no native element behind it (Card, Dialog). It is a custom element in an implementation (`<gr-card>`), with its parts as child classes in the Reference and as attribute directives in Angular. The opposite of a native-backed component, which is an attribute on the native element.
+_Avoid_: Container component, widget
+
+**Card**:
+A bordered surface that groups related content and actions, made of optional parts: header (title and actions), media, body and footer. It has no role of its own and is never interactive as a whole.
+_Avoid_: Tile, panel, box
+
 **Markup contract**:
 The exact elements, classes and attributes a component must render for the style layer to style it; every implementation renders the same markup contract.
 _Avoid_: Template, API, structure

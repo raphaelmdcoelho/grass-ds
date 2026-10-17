@@ -46,6 +46,41 @@ export class Example {}
 - **Disabled links**: a disabled `<a grButton>` keeps its `href` but gets `aria-disabled="true"` and stays focusable. Click, Ctrl-click, middle-click and Enter are cancelled before any `(click)` handler runs, so handlers never fire while it is disabled.
 - **Use the `disabled` input.** An `aria-disabled` or `type` written statically in the template is kept, but do not bind `[attr.aria-disabled]` or `[attr.type]` on the same element: the component owns those attributes.
 
+## Card
+
+The Card is a composite, so it is an element, `<gr-card>`, with its parts as attribute directives on elements **you** choose. It needs no `@angular/forms` and comes from the package root:
+
+```ts
+import { Component } from '@angular/core';
+import { GR_CARD, GrButton } from '@grass-ds/angular';
+
+@Component({
+  selector: 'app-plan',
+  imports: [GR_CARD, GrButton],
+  template: `
+    <gr-card variant="elevated" role="article" aria-labelledby="plan-title">
+      <header grCardHeader>
+        <h3 grCardTitle id="plan-title">Team plan</h3>
+        <div grCardActions><button grButton variant="secondary">Edit</button></div>
+      </header>
+      <div grCardBody>...</div>
+      <footer grCardFooter><button grButton>Choose plan</button></footer>
+    </gr-card>
+  `,
+})
+export class Plan {}
+```
+
+`GR_CARD` bundles `GrCard`, `GrCardHeader`, `GrCardTitle`, `GrCardActions`, `GrCardMedia`, `GrCardBody` and `GrCardFooter`; import them individually if you prefer. Each part directive only adds its `gr-card__*` class (`<div grCardMedia><img alt="" /></div>` for media), and `<gr-card>` renders no wrapper, so the output is the markup of the `@grass-ds/css` Card contract, pixel for pixel.
+
+| Input     | Type                       | Default      | Notes                       |
+| --------- | -------------------------- | ------------ | --------------------------- |
+| `variant` | `'outlined' \| 'elevated'` | `'outlined'` | Rendered as `data-variant`. |
+
+- **Heading level**: `grCardTitle` goes on whichever heading element fits your page (`<h2>`, `<h3>`...); the card never picks one.
+- **Semantics**: the `<gr-card>` host has no role. Add `role="article"` (or `group`/`region`) **together with** `aria-labelledby` pointing at the title, or leave it as a plain container. Attributes you write on the host are kept. For a list of cards, put each in an `<li>`.
+- **Not interactive as a whole**: do not make the card a link or button, and do not nest interactive cards; put actions in the header or footer. Left out of 1.0: clickable or selectable cards, a horizontal layout.
+
 ## TextField
 
 `@angular/forms` is an **optional** peer dependency: it is needed only by this entry point. `GrButton` comes from the package root, which never imports it, so a Button-only app does not need `@angular/forms` installed. Import the TextField from its own entry point:
