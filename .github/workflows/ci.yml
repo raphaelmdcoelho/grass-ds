@@ -50,3 +50,38 @@ jobs:
       - run: pnpm check:contrast
       - run: pnpm test
       - run: pnpm build:catalog
+
+  # Not a required check yet: it is promoted with the drift-check milestone. It runs in parallel
+  # with `verify` and builds the catalog itself so it does not wait for it.
+  parity:
+    name: Parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PARITY_OUT: ${{ github.workspace }}/parity-out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:catalog
+      - name: Cache the Chromium browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      # With a warm cache this only checks the browser; --with-deps always installs the system
+      # libraries, which the cache does not cover.
+      - name: Install Chromium and its system libraries
+        run: pnpm --filter @grass-ds/catalog-parity exec playwright-core install --with-deps chromium
+      - run: pnpm parity
+      - name: Upload the mismatching screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-mismatches
+          path: parity-out
+          if-no-files-found: ignore
