@@ -191,3 +191,8 @@ test('Focus in forced colours uses a system colour and drops the inner band', ()
   });
   assert.ok(found);
 });
+
+test('Checkbox: a disabled label is GrayText in forced colours', () => {
+  const label = css.slice(css.indexOf('.gr-checkbox-label {'), css.indexOf('.gr-checkbox-label ~'));
+  assert.match(label, /&:has\(:disabled\)[\s\S]*forced-colors: active[\s\S]*color: GrayText/);
+});
