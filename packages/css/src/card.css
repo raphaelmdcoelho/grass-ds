@@ -1,0 +1,126 @@
+/*
+ * Card. Markup contract: .gr-card goes on any element; its parts are optional and go in this order.
+ * The element is the consumer's choice (div, article, section, li...), and so is the heading level.
+ *
+ *   <article class="gr-card" data-variant="elevated" aria-labelledby="plan-title">
+ *     <div class="gr-card__header">
+ *       <h3 class="gr-card__title" id="plan-title">Team plan</h3>
+ *       <div class="gr-card__actions"><button class="gr-button" data-variant="secondary">Edit</button></div>
+ *     </div>
+ *     <div class="gr-card__media"><img src="..." alt="" /></div>
+ *     <div class="gr-card__body">...</div>
+ *     <div class="gr-card__footer"><button class="gr-button">Choose plan</button></div>
+ *   </article>
+ *
+ * data-variant="outlined" (the default when absent) or "elevated". A card has no role of its own;
+ * add one (role="group" or an article/section) only together with an accessible name. Use <header> and
+ * <footer> for the parts only inside an article, a section or role="article": elsewhere they become
+ * banner and contentinfo landmarks. Add
+ * data-query to make the card a container for @container queries (opt-in: container-type traps
+ * position: fixed descendants and creates a stacking context).
+ */
+@layer grass.components {
+  .gr-card {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    border: var(--gr-border-width) solid var(--gr-card-border);
+    border-radius: var(--gr-card-radius);
+    background-color: var(--gr-card-background);
+    color: var(--gr-card-foreground);
+
+    /* No overflow: hidden here, it would clip the focus rings of the controls inside. */
+    &[data-variant='elevated'] {
+      /* Compose, never replace: the focus ring's inner band is part of this shadow. */
+      box-shadow: var(--gr-focus-inner), var(--gr-card-shadow-elevated);
+    }
+
+    &[data-query] {
+      container-type: inline-size;
+    }
+
+    @media (forced-colors: active) {
+      /* Fills and shadows are dropped in forced colours: the border carries the card's edge. */
+      border-color: CanvasText;
+
+      /* A second ring outside the border tells elevated from outlined without changing the size. */
+      &[data-variant='elevated']:not(:focus-visible) {
+        outline: var(--gr-border-width) solid CanvasText;
+        outline-offset: var(--gr-border-width);
+      }
+    }
+  }
+
+  .gr-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gr-card-gap);
+    padding: var(--gr-card-padding);
+    border-block-end: var(--gr-border-width) solid var(--gr-card-divider);
+
+    @media (forced-colors: active) {
+      border-block-end-color: CanvasText;
+    }
+  }
+
+  /* Styled by class, not by tag, so the consumer picks the heading level that fits the page. */
+  .gr-card__title {
+    margin: 0;
+    font-family: var(--gr-text-family-heading);
+    font-size: var(--gr-card-title-size);
+    font-weight: var(--gr-card-title-weight);
+    line-height: var(--gr-card-title-line-height);
+  }
+
+  .gr-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gr-card-gap);
+    margin-inline-start: auto;
+  }
+
+  /* Full width; rounded only where it meets the card's corners, so nothing is clipped. */
+  .gr-card__media {
+    overflow: hidden;
+
+    &:first-child {
+      border-start-start-radius: calc(var(--gr-card-radius) - var(--gr-border-width));
+      border-start-end-radius: calc(var(--gr-card-radius) - var(--gr-border-width));
+    }
+
+    &:last-child {
+      border-end-start-radius: calc(var(--gr-card-radius) - var(--gr-border-width));
+      border-end-end-radius: calc(var(--gr-card-radius) - var(--gr-border-width));
+    }
+
+    :is(img, video, svg, canvas) {
+      display: block;
+      inline-size: 100%;
+      block-size: auto;
+    }
+  }
+
+  /* Takes the spare height, so footers line up across the cards of a grid row. */
+  .gr-card__body {
+    flex: 1 1 auto;
+    padding: var(--gr-card-padding);
+  }
+
+  .gr-card__footer {
+    display: flex;
+
+    /* Pins the footer to the bottom even when the card has no body to take the spare height. */
+    margin-block-start: auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gr-card-gap);
+    padding: var(--gr-card-padding);
+    border-block-start: var(--gr-border-width) solid var(--gr-card-divider);
+
+    @media (forced-colors: active) {
+      border-block-start-color: CanvasText;
+    }
+  }
+}

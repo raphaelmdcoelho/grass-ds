@@ -40,6 +40,11 @@
     &:has(:disabled) {
       color: var(--gr-checkbox-label-disabled);
       cursor: not-allowed;
+
+      /* The token colour is repainted in forced colours; GrayText keeps the label greyed. */
+      @media (forced-colors: active) {
+        color: GrayText;
+      }
     }
   }
 

@@ -13,6 +13,7 @@ export const PARTS = [
   'button',
   'text-field',
   'checkbox',
+  'card',
   'utilities',
 ];
 
