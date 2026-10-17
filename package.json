@@ -24,7 +24,8 @@
     "lint:js": "eslint .",
     "lint:css": "stylelint \"**/*.css\"",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "parity": "pnpm --filter @grass-ds/catalog-parity run parity"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
