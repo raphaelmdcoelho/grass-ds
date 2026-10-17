@@ -161,7 +161,7 @@ test('text, muted text and links are contrast-paired on the card surface', async
   const ref = (name) => /^\{(.+)\}$/.exec(card[name].$value)[1];
   const background = ref('background');
   // A card boundary is not a UI component (WCAG 1.4.11), but everything written on it is held to text contrast.
-  for (const fg of [ref('foreground'), ref('foreground-muted'), 'color.link.default']) {
+  for (const fg of [ref('foreground'), 'color.text.muted', 'color.link.default']) {
     const pair = contrast.pairs.find((p) => p.fg === fg && p.bg === background);
     assert.ok(pair, `${fg} is not paired with the card background ${background}`);
     assert.equal(pair.level, 'text');
