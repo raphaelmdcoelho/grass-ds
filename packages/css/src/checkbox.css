@@ -24,6 +24,11 @@
 @layer grass.components {
   .gr-checkbox-label {
     display: flex;
+
+    /* Only the box and its text are the target, not the rest of a wide row. */
+    align-self: flex-start;
+    inline-size: fit-content;
+    max-inline-size: 100%;
     align-items: flex-start;
     gap: var(--gr-checkbox-gap);
     min-block-size: 1.5rem; /* WCAG 2.2 target size: the label is part of the target. */
@@ -104,7 +109,9 @@
       inline-size: var(--gr-checkbox-mark-size);
       block-size: var(--gr-checkbox-mark-size);
       background-color: var(--gr-checkbox-current-mark);
-      clip-path: polygon(14% 44%, 0 59%, 50% 100%, 100% 17%, 84% 0, 50% 66%);
+
+      /* Inset by about 12% on every side so the tick never touches the border, at any size. */
+      clip-path: polygon(23% 45%, 12% 57%, 50% 88%, 88% 25%, 76% 12%, 50% 62%);
       transform: scale(0);
       transition: transform var(--gr-checkbox-transition-duration) var(--gr-motion-easing-default);
     }
@@ -124,7 +131,7 @@
 
     /* Mixed wins over checked, as it does natively. */
     &:indeterminate::before {
-      clip-path: polygon(10% 40%, 90% 40%, 90% 60%, 10% 60%);
+      clip-path: polygon(18% 42%, 82% 42%, 82% 58%, 18% 58%);
     }
 
     &:focus-visible {
@@ -150,12 +157,9 @@
 
     @media (forced-colors: active) {
       /*
-       * Forced colours would repaint the fill and the mark with the same colour. Opting out and using
-       * system colours keeps the three states apart: empty box, filled box with a tick, filled box
-       * with a dash.
+       * Fills are repainted by the browser, so the states are told apart with system colours: an
+       * empty box, a Highlight box with a tick, a Highlight box with a dash.
        */
-      forced-color-adjust: none;
-
       --gr-checkbox-current-background: Field;
       --gr-checkbox-current-background-hover: Field;
       --gr-checkbox-current-border: FieldText;
@@ -168,6 +172,13 @@
         --gr-checkbox-current-background-hover: Highlight;
         --gr-checkbox-current-border: Highlight;
         --gr-checkbox-current-border-hover: Highlight;
+      }
+
+      /* Colour is not a cue here, so invalid gets a thicker border (the box is fixed-size, the mark shrinks to fit). */
+      &[aria-invalid='true'] {
+        --gr-checkbox-mark-size: calc(var(--gr-checkbox-size) - 2 * var(--gr-border-focus-width));
+
+        border-width: var(--gr-border-focus-width);
       }
 
       &:disabled {

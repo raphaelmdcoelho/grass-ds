@@ -163,10 +163,31 @@ test('Checkbox draws its mark in CSS, covers every state and keeps the three sta
     assert.ok(checkbox.includes(state), `${state} is missing`);
   assert.match(checkbox, /&\[aria-invalid=["']true["']\]/);
   const forced = checkbox.slice(checkbox.lastIndexOf('@media (forced-colors: active)'));
-  assert.match(forced, /forced-color-adjust: none/);
+  assert.doesNotMatch(forced, /forced-color-adjust/);
+  assert.match(forced, /\[aria-invalid=["']true["']\][^}]*border-width/);
   for (const colour of ['Highlight', 'HighlightText', 'FieldText', 'GrayText'])
     assert.ok(forced.includes(colour));
   // Mixed has its own shape and is declared after checked.
   assert.ok(checkbox.indexOf('&:indeterminate::before {') > checkbox.indexOf('&:checked::before'));
   assert.ok(checkbox.indexOf('&:disabled {') > checkbox.indexOf("&[aria-invalid='true']"));
+});
+
+test('Checkbox: only the box and its text are the click target, not the whole row', () => {
+  const label = css.slice(css.indexOf('.gr-checkbox-label {'), css.indexOf('.gr-checkbox-label ~'));
+  assert.match(label, /inline-size: fit-content/);
+  assert.match(label, /align-self: flex-start/);
+});
+
+test('Focus in forced colours uses a system colour and drops the inner band', () => {
+  const base = root.nodes.find((n) => n.type === 'atrule' && n.params === 'grass.base');
+  let found = false;
+  base.walkAtRules('media', (media) => {
+    if (!/forced-colors/.test(media.params)) return;
+    media.walkRules(/focus-visible/, (rule) => {
+      found = true;
+      assert.match(rule.toString(), /outline-color: Highlight/);
+      assert.match(rule.toString(), /--gr-focus-inner: 0 0 0 0 transparent/);
+    });
+  });
+  assert.ok(found);
 });
