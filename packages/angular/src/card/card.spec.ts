@@ -16,6 +16,8 @@ import { GR_CARD, GrCardVariant } from './card';
     </gr-card>
     <gr-card id="bare"><p id="bare-content">Just content</p></gr-card>
     <gr-card id="named" variant="elevated" class="extra" data-id="x"></gr-card>
+    <gr-card id="static" data-variant="elevated"></gr-card>
+    <gr-card id="both" data-variant="elevated" [variant]="variant()"></gr-card>
   `,
 })
 class Host {
@@ -61,6 +63,15 @@ describe('GrCard', () => {
     host.variant.set('elevated');
     await fixture.whenStable();
     expect(get('#full').getAttribute('data-variant')).toBe('elevated');
+  });
+
+  it('keeps a static data-variant written on the host, and a bound variant wins over it', async () => {
+    const { fixture, host, get } = await setup();
+    expect(get('#static').getAttribute('data-variant')).toBe('elevated');
+    expect(get('#both').getAttribute('data-variant')).toBe('outlined');
+    host.variant.set('elevated');
+    await fixture.whenStable();
+    expect(get('#both').getAttribute('data-variant')).toBe('elevated');
   });
 
   it('has no role of its own and keeps the role, name and extra attributes the consumer wrote', async () => {

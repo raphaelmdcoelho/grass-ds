@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  ElementRef,
   ViewEncapsulation,
+  inject,
   input,
 } from '@angular/core';
 
@@ -24,12 +26,24 @@ export type GrCardVariant = 'outlined' | 'elevated';
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'gr-card',
-    '[attr.data-variant]': 'variant()',
+    '[attr.data-variant]': 'resolvedVariant()',
   },
 })
 export class GrCard {
-  /** Visual variant, set as `data-variant` on the host. */
-  readonly variant = input<GrCardVariant>('outlined');
+  /**
+   * Visual variant, set as `data-variant` on the host. A bound `variant` wins; otherwise a static
+   * `data-variant` written on `<gr-card>` is kept; otherwise it is `outlined`.
+   */
+  readonly variant = input<GrCardVariant>();
+
+  // A host binding would overwrite an attribute the consumer wrote in the template, so the authored
+  // value is read once.
+  private readonly authoredVariant =
+    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.getAttribute('data-variant');
+
+  protected resolvedVariant(): string {
+    return this.variant() ?? this.authoredVariant ?? 'outlined';
+  }
 }
 
 /** `.gr-card__header`: the title and, optionally, the actions. */
