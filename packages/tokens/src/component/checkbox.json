@@ -8,21 +8,56 @@
       "$type": "dimension",
       "$value": "{radius.small}"
     },
+    "gap": {
+      "$type": "dimension",
+      "$value": "{layout.gap.tight}"
+    },
+    "transition-duration": {
+      "$type": "duration",
+      "$value": "{motion.duration.fast}"
+    },
+    "$type": "color",
     "background": {
-      "$type": "color",
       "$value": "{color.surface.raised}"
     },
     "border": {
-      "$type": "color",
       "$value": "{color.border.strong}"
     },
+    "border-hover": {
+      "$value": "{color.border.strong-hover}"
+    },
     "background-checked": {
-      "$type": "color",
       "$value": "{color.action.primary.background}"
     },
+    "background-checked-hover": {
+      "$value": "{color.action.primary.background-hover}"
+    },
+    "border-checked": {
+      "$value": "{color.border.strong}"
+    },
+    "border-checked-hover": {
+      "$value": "{color.border.strong-hover}"
+    },
     "foreground-checked": {
-      "$type": "color",
       "$value": "{color.action.primary.foreground}"
+    },
+    "border-invalid": {
+      "$value": "{color.feedback.danger.text}"
+    },
+    "background-disabled": {
+      "$value": "{color.action.disabled.background}"
+    },
+    "border-disabled": {
+      "$value": "{color.action.disabled.border}"
+    },
+    "foreground-disabled": {
+      "$value": "{color.action.disabled.foreground}"
+    },
+    "label": {
+      "$value": "{color.text.default}"
+    },
+    "label-disabled": {
+      "$value": "{color.action.disabled.foreground}"
     }
   }
 }
