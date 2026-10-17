@@ -147,6 +147,8 @@ test('TextField keeps the theme colours on autofill and gives invalid and read-o
   );
   assert.match(forced, /\[aria-invalid=["']true["']\][^}]*border-width/);
   assert.match(forced, /\[readonly\][^}]*border-style: dashed/);
+  // The thicker border is paid for out of the padding on both axes, so text does not move.
+  assert.match(forced, /padding-inline: calc\(/);
 });
 
 test('TextField: invalid is declared after read-only, so an invalid read-only field shows invalid', () => {

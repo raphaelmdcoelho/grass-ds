@@ -137,6 +137,10 @@
           var(--gr-text-field-padding-block) -
             (var(--gr-border-focus-width) - var(--gr-border-width))
         );
+        padding-inline: calc(
+          var(--gr-text-field-padding-inline) -
+            (var(--gr-border-focus-width) - var(--gr-border-width))
+        );
         border-width: var(--gr-border-focus-width);
       }
 
