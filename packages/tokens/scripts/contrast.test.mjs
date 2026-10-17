@@ -102,3 +102,51 @@ test('every enabled text-field colour is contrast-paired and no border state equ
     }
   }
 });
+
+test('every enabled checkbox colour is contrast-paired and its boundary and mark hold in every state', async () => {
+  const checkbox = JSON.parse(
+    await readFile(new URL('../src/component/checkbox.json', import.meta.url), 'utf8'),
+  )['checkbox'];
+  const contrast = JSON.parse(
+    await readFile(new URL('../src/contrast.json', import.meta.url), 'utf8'),
+  );
+  const ref = (name) => /^\{(.+)\}$/.exec(checkbox[name].$value)[1];
+  const has = (fg, bg) => contrast.pairs.some((pair) => pair.fg === fg && pair.bg === bg);
+
+  // The box boundary is held to 3:1 (WCAG 1.4.11) on every surface in every enabled state; a fill
+  // alone cannot do it (the primary fill is under 3:1 on white), so the border stays strong when checked.
+  for (const name of [
+    'border',
+    'border-hover',
+    'border-checked',
+    'border-checked-hover',
+    'border-invalid',
+  ])
+    for (const surface of ['surface.default', 'surface.raised', 'surface.sunken'])
+      assert.ok(has(ref(name), `color.${surface}`), `${name} is not paired with ${surface}`);
+
+  // The mark is held to the fill it sits on.
+  for (const fill of ['background-checked', 'background-checked-hover'])
+    assert.ok(has(ref('foreground-checked'), ref(fill)), `mark is not paired with ${fill}`);
+  assert.ok(has(ref('label'), 'color.surface.default'));
+
+  for (const theme of THEMES) {
+    const tokens = await resolvedTokens(theme);
+    const surfaces = Object.entries(tokens).filter(([path]) => path.startsWith('color.surface.'));
+    for (const name of Object.keys(checkbox).filter((key) => key.startsWith('border'))) {
+      for (const [surfacePath, surface] of surfaces)
+        assert.notEqual(
+          tokens[ref(name)],
+          surface,
+          `${theme}: checkbox ${name} equals ${surfacePath}`,
+        );
+    }
+    for (const fill of ['background-checked', 'background-checked-hover'])
+      for (const [surfacePath, surface] of surfaces)
+        assert.notEqual(
+          tokens[ref(fill)],
+          surface,
+          `${theme}: checkbox ${fill} equals ${surfacePath}`,
+        );
+  }
+});

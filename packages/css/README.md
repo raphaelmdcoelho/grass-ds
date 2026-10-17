@@ -54,6 +54,39 @@ Variants and states are expressed with data and ARIA attributes (`data-variant`,
 - **Disabled and read-only** are the native `disabled` and `readonly` attributes. A read-only field that is also invalid shows the invalid border.
 - **Forced colours**: fills are dropped, so invalid gets a thicker border and read-only a dashed one. Autofilled fields keep the theme's colours.
 
+## Checkbox
+
+`.gr-checkbox` styles `<input type="checkbox">` (the native control with `appearance: none`; the tick and dash are drawn in CSS and scale with the size token). The label **wraps** the input in `.gr-checkbox-label`, so the whole label is the click target (and meets the 24px target size):
+
+```html
+<div class="gr-field">
+  <label class="gr-checkbox-label">
+    <input class="gr-checkbox" type="checkbox" aria-describedby="terms-hint terms-error" />
+    <span>Accept the terms</span>
+  </label>
+  <p class="gr-field__hint" id="terms-hint">You can withdraw at any time.</p>
+  <p class="gr-field__error" id="terms-error">Accept the terms to continue.</p>
+</div>
+```
+
+A group of related checkboxes is a **field group**: a `fieldset` with a `legend`, each checkbox in its own `.gr-field`. Describe the group with `aria-describedby` on the fieldset:
+
+```html
+<fieldset class="gr-field-group" aria-describedby="topics-hint">
+  <legend class="gr-field-group__legend">Topics</legend>
+  <p class="gr-field__hint" id="topics-hint">Choose any that apply.</p>
+  <div class="gr-field">
+    <label class="gr-checkbox-label"
+      ><input class="gr-checkbox" type="checkbox" /><span>Design tokens</span></label
+    >
+  </div>
+</fieldset>
+```
+
+- **States** are native or ARIA: `:checked`, the `indeterminate` DOM property (it has no attribute, so set `input.indeterminate = true`; the browser clears it when the user toggles), `disabled`, and `aria-invalid="true"` set by your application with the error message (an inner edge shows it, not colour alone). Error announcement rules are the same as for TextField.
+- **Contrast**: the checked fill is not enough on its own to meet 3:1 on white, so the box keeps its strong border when checked; the border and the mark are contrast-checked in both themes.
+- **Forced colours** use system colours (`Field`, `Highlight`, `HighlightText`) so an empty box, a tick and a dash stay distinct.
+
 ## Theming
 
 The OS preference applies by default; force a theme with `data-theme="light"` or `data-theme="dark"` on the `<html>` element. Scoped themes are not supported.

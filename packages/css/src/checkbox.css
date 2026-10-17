@@ -1,0 +1,200 @@
+/*
+ * Checkbox. Markup contract: the label wraps the input, so the whole label is the click target.
+ *
+ *   <div class="gr-field">
+ *     <label class="gr-checkbox-label">
+ *       <input class="gr-checkbox" type="checkbox" aria-describedby="terms-hint terms-error" />
+ *       <span>Accept the terms</span>
+ *     </label>
+ *     <p class="gr-field__hint" id="terms-hint">You can withdraw at any time.</p>
+ *     <p class="gr-field__error" id="terms-error">Accept the terms to continue.</p>
+ *   </div>
+ *
+ * A group is a fieldset with a legend; each checkbox is its own .gr-field inside it:
+ *
+ *   <fieldset class="gr-field-group" aria-describedby="topics-hint">
+ *     <legend class="gr-field-group__legend">Topics</legend>
+ *     <p class="gr-field__hint" id="topics-hint">Choose any.</p>
+ *     <div class="gr-field">...</div>
+ *   </fieldset>
+ *
+ * Checked is the native :checked, mixed is the indeterminate DOM property, invalid is
+ * aria-invalid="true" (set by the application) and disabled is the native attribute.
+ */
+@layer grass.components {
+  .gr-checkbox-label {
+    display: flex;
+
+    /* Only the box and its text are the target, not the rest of a wide row. */
+    align-self: flex-start;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    align-items: flex-start;
+    gap: var(--gr-checkbox-gap);
+    min-block-size: 1.5rem; /* WCAG 2.2 target size: the label is part of the target. */
+    color: var(--gr-checkbox-label);
+    font-size: var(--gr-text-size-body);
+    line-height: var(--gr-text-line-height-body);
+    cursor: pointer;
+
+    &:has(:disabled) {
+      color: var(--gr-checkbox-label-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  /* Hint and error line up with the label text, not under the box. */
+  .gr-checkbox-label ~ :is(.gr-field__hint, .gr-field__error) {
+    padding-inline-start: calc(var(--gr-checkbox-size) + var(--gr-checkbox-gap));
+  }
+
+  .gr-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gr-text-field-gap);
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .gr-field-group__legend {
+    padding: 0;
+    margin-block-end: var(--gr-text-field-gap);
+    color: var(--gr-text-field-label);
+    font-size: var(--gr-text-size-body);
+    font-weight: var(--gr-text-weight-emphasis);
+    line-height: var(--gr-text-line-height-body);
+  }
+
+  .gr-checkbox {
+    --gr-checkbox-current-background: var(--gr-checkbox-background);
+    --gr-checkbox-current-background-hover: var(--gr-checkbox-background);
+    --gr-checkbox-current-border: var(--gr-checkbox-border);
+    --gr-checkbox-current-border-hover: var(--gr-checkbox-border-hover);
+    --gr-checkbox-current-mark: var(--gr-checkbox-foreground-checked);
+
+    /* The mark fills the inside of the border: a percentage would be cyclic in the grid. */
+    --gr-checkbox-mark-size: calc(var(--gr-checkbox-size) - 2 * var(--gr-border-width));
+
+    /* A second, inner edge: invalid is not told by colour alone (WCAG 1.4.1). */
+    --gr-checkbox-current-edge: 0 0 0 0 transparent;
+
+    display: inline-grid;
+    flex: none;
+    place-content: center;
+    inline-size: var(--gr-checkbox-size);
+    block-size: var(--gr-checkbox-size);
+
+    /* Centre the box on the first line of the label. */
+    margin: calc((1lh - var(--gr-checkbox-size)) / 2) 0 0;
+    padding: 0;
+    border: var(--gr-border-width) solid var(--gr-checkbox-current-border);
+    border-radius: var(--gr-checkbox-radius);
+    background-color: var(--gr-checkbox-current-background);
+    cursor: inherit;
+    appearance: none;
+
+    /* Compose, never replace: the focus ring's inner band is part of this shadow. */
+    box-shadow: var(--gr-focus-inner), var(--gr-checkbox-current-edge);
+
+    /* Durations collapse to 0ms under prefers-reduced-motion (tokens.css), which stops these. */
+    transition-property: background-color, border-color, box-shadow;
+    transition-duration: var(--gr-checkbox-transition-duration);
+    transition-timing-function: var(--gr-motion-easing-default);
+
+    /* The mark is drawn with a clipped box, so it scales with the size token and needs no image. */
+    &::before {
+      content: '';
+      inline-size: var(--gr-checkbox-mark-size);
+      block-size: var(--gr-checkbox-mark-size);
+      background-color: var(--gr-checkbox-current-mark);
+
+      /* Inset by about 12% on every side so the tick never touches the border, at any size. */
+      clip-path: polygon(23% 45%, 12% 57%, 50% 88%, 88% 25%, 76% 12%, 50% 62%);
+      transform: scale(0);
+      transition: transform var(--gr-checkbox-transition-duration) var(--gr-motion-easing-default);
+    }
+
+    &:checked,
+    &:indeterminate {
+      --gr-checkbox-current-background: var(--gr-checkbox-background-checked);
+      --gr-checkbox-current-background-hover: var(--gr-checkbox-background-checked-hover);
+      --gr-checkbox-current-border: var(--gr-checkbox-border-checked);
+      --gr-checkbox-current-border-hover: var(--gr-checkbox-border-checked-hover);
+    }
+
+    &:checked::before,
+    &:indeterminate::before {
+      transform: scale(1);
+    }
+
+    /* Mixed wins over checked, as it does natively. */
+    &:indeterminate::before {
+      clip-path: polygon(18% 42%, 82% 42%, 82% 58%, 18% 58%);
+    }
+
+    &:focus-visible {
+      --gr-focus-inner: var(--gr-focus-band);
+    }
+
+    &[aria-invalid='true'] {
+      --gr-checkbox-current-border: var(--gr-checkbox-border-invalid);
+      --gr-checkbox-current-border-hover: var(--gr-checkbox-border-invalid);
+      --gr-checkbox-current-edge: inset 0 0 0 var(--gr-border-width)
+        var(--gr-checkbox-border-invalid);
+    }
+
+    /* Last, so it beats the states above at equal specificity. */
+    &:disabled {
+      --gr-checkbox-current-background: var(--gr-checkbox-background-disabled);
+      --gr-checkbox-current-background-hover: var(--gr-checkbox-background-disabled);
+      --gr-checkbox-current-border: var(--gr-checkbox-border-disabled);
+      --gr-checkbox-current-border-hover: var(--gr-checkbox-border-disabled);
+      --gr-checkbox-current-mark: var(--gr-checkbox-foreground-disabled);
+      --gr-checkbox-current-edge: 0 0 0 0 transparent;
+    }
+
+    @media (forced-colors: active) {
+      /*
+       * Fills are repainted by the browser, so the states are told apart with system colours: an
+       * empty box, a Highlight box with a tick, a Highlight box with a dash.
+       */
+      --gr-checkbox-current-background: Field;
+      --gr-checkbox-current-background-hover: Field;
+      --gr-checkbox-current-border: FieldText;
+      --gr-checkbox-current-border-hover: FieldText;
+      --gr-checkbox-current-mark: HighlightText;
+
+      &:checked,
+      &:indeterminate {
+        --gr-checkbox-current-background: Highlight;
+        --gr-checkbox-current-background-hover: Highlight;
+        --gr-checkbox-current-border: Highlight;
+        --gr-checkbox-current-border-hover: Highlight;
+      }
+
+      /* Colour is not a cue here, so invalid gets a thicker border (the box is fixed-size, the mark shrinks to fit). */
+      &[aria-invalid='true'] {
+        --gr-checkbox-mark-size: calc(var(--gr-checkbox-size) - 2 * var(--gr-border-focus-width));
+
+        border-width: var(--gr-border-focus-width);
+      }
+
+      &:disabled {
+        --gr-checkbox-current-background: Field;
+        --gr-checkbox-current-background-hover: Field;
+        --gr-checkbox-current-border: GrayText;
+        --gr-checkbox-current-border-hover: GrayText;
+        --gr-checkbox-current-mark: GrayText;
+      }
+    }
+  }
+
+  /* Hover on the box or anywhere on its label. */
+  .gr-checkbox:hover:not(:disabled),
+  .gr-checkbox-label:hover .gr-checkbox:not(:disabled) {
+    border-color: var(--gr-checkbox-current-border-hover);
+    background-color: var(--gr-checkbox-current-background-hover);
+  }
+}

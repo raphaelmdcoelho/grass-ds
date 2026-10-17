@@ -114,6 +114,15 @@
     box-shadow: var(--gr-focus-inner);
   }
 
+  /* Forced colours: the outline takes a system colour and the inner band (a shadow) is dropped. */
+  @media (forced-colors: active) {
+    :focus-visible {
+      --gr-focus-inner: 0 0 0 0 transparent;
+
+      outline-color: Highlight;
+    }
+  }
+
   /* The outline alone gives links 4.22:1; the inner band would only add noise on text. */
   a:focus-visible {
     --gr-focus-inner: 0 0 0 0 transparent;

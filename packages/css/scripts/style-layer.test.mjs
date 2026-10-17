@@ -5,6 +5,9 @@ import postcss from 'postcss';
 import { buildCss } from './build.mjs';
 
 const css = await buildCss();
+/** One component's source, so assertions about order and last-of-kind do not read its neighbours. */
+const section = (name, next) =>
+  css.slice(css.indexOf(`${name}. Markup contract`), css.indexOf(`${next}. Markup contract`));
 const root = postcss.parse(css);
 const tokensCss = await readFile(new URL('../../tokens/dist/tokens.css', import.meta.url), 'utf8');
 
@@ -129,7 +132,8 @@ test('TextField covers the field wrapper, states, textarea and forced colours', 
 });
 
 test('TextField disabled and read-only styles come after hover and focus so they win', () => {
-  const at = (needle) => css.lastIndexOf(needle);
+  const field = section('TextField', 'Checkbox');
+  const at = (needle) => field.lastIndexOf(needle);
   assert.ok(at('&:disabled {') > at('&[readonly]'));
   assert.ok(at('&[readonly]') > at('&:focus-visible'));
   assert.ok(at('&:focus-visible') > at('&:hover'));
@@ -138,11 +142,52 @@ test('TextField disabled and read-only styles come after hover and focus so they
 test('TextField keeps the theme colours on autofill and gives invalid and read-only a forced-colours cue', () => {
   assert.match(css, /&:autofill/);
   assert.match(css, /inset 0 0 0 100rem/);
-  const forced = css.slice(css.lastIndexOf('@media (forced-colors: active)'));
+  const forced = section('TextField', 'Checkbox').slice(
+    section('TextField', 'Checkbox').lastIndexOf('@media (forced-colors: active)'),
+  );
   assert.match(forced, /\[aria-invalid=["']true["']\][^}]*border-width/);
   assert.match(forced, /\[readonly\][^}]*border-style: dashed/);
+  // The thicker border is paid for out of the padding on both axes, so text does not move.
+  assert.match(forced, /padding-inline: calc\(/);
 });
 
 test('TextField: invalid is declared after read-only, so an invalid read-only field shows invalid', () => {
   assert.ok(css.indexOf("&[aria-invalid='true'] {") > css.indexOf('&[readonly] {'));
+});
+
+test('Checkbox draws its mark in CSS, covers every state and keeps the three states apart in forced colours', () => {
+  const checkbox = css.slice(css.indexOf('Checkbox. Markup contract'));
+  assert.match(checkbox, /appearance: none/);
+  assert.doesNotMatch(checkbox, /url\(/);
+  for (const state of ['&:checked', '&:indeterminate', '&:focus-visible', '&:disabled'])
+    assert.ok(checkbox.includes(state), `${state} is missing`);
+  assert.match(checkbox, /&\[aria-invalid=["']true["']\]/);
+  const forced = checkbox.slice(checkbox.lastIndexOf('@media (forced-colors: active)'));
+  assert.doesNotMatch(forced, /forced-color-adjust/);
+  assert.match(forced, /\[aria-invalid=["']true["']\][^}]*border-width/);
+  for (const colour of ['Highlight', 'HighlightText', 'FieldText', 'GrayText'])
+    assert.ok(forced.includes(colour));
+  // Mixed has its own shape and is declared after checked.
+  assert.ok(checkbox.indexOf('&:indeterminate::before {') > checkbox.indexOf('&:checked::before'));
+  assert.ok(checkbox.indexOf('&:disabled {') > checkbox.indexOf("&[aria-invalid='true']"));
+});
+
+test('Checkbox: only the box and its text are the click target, not the whole row', () => {
+  const label = css.slice(css.indexOf('.gr-checkbox-label {'), css.indexOf('.gr-checkbox-label ~'));
+  assert.match(label, /inline-size: fit-content/);
+  assert.match(label, /align-self: flex-start/);
+});
+
+test('Focus in forced colours uses a system colour and drops the inner band', () => {
+  const base = root.nodes.find((n) => n.type === 'atrule' && n.params === 'grass.base');
+  let found = false;
+  base.walkAtRules('media', (media) => {
+    if (!/forced-colors/.test(media.params)) return;
+    media.walkRules(/focus-visible/, (rule) => {
+      found = true;
+      assert.match(rule.toString(), /outline-color: Highlight/);
+      assert.match(rule.toString(), /--gr-focus-inner: 0 0 0 0 transparent/);
+    });
+  });
+  assert.ok(found);
 });

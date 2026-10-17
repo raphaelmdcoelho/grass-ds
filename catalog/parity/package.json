@@ -1,0 +1,14 @@
+{
+  "name": "@grass-ds/catalog-parity",
+  "private": true,
+  "version": "0.0.0-development",
+  "description": "Pixel parity check between the Reference and Angular Storybooks of the composed Catalog.",
+  "type": "module",
+  "scripts": {
+    "parity": "node parity.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.60.0",
+    "pngjs": "^7.0.0"
+  }
+}

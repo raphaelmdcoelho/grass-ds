@@ -22,7 +22,11 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "tsconfig.spec.json",
-            "include": ["src/**/*.spec.ts", "../text-field/**/*.spec.ts"]
+            "include": [
+              "src/**/*.spec.ts",
+              "../text-field/**/*.spec.ts",
+              "../checkbox/**/*.spec.ts"
+            ]
           }
         }
       }

@@ -8,7 +8,7 @@ Angular implementation of the Grass Design System. Components are standalone att
 npm install @grass-ds/angular @grass-ds/css @grass-ds/tokens
 ```
 
-`@grass-ds/css` and `@angular/core` are peer dependencies (`@angular/forms` is an optional one, needed only by `@grass-ds/angular/text-field`). Load the stylesheets once, for example in `angular.json` `styles`:
+`@grass-ds/css` and `@angular/core` are peer dependencies. `@angular/forms` is an optional one, needed only by the entry points that touch forms (`@grass-ds/angular/text-field`, `@grass-ds/angular/checkbox`); an app created without it needs `npm install @angular/forms` before using them. Load the stylesheets once, for example in `angular.json` `styles`:
 
 ```json
 [
@@ -89,21 +89,100 @@ export class Example {
 | ----------- | --------- | ------- | -------------------------------------------------------------------- |
 | `grInvalid` | `boolean` | `false` | Sets `aria-invalid="true"`. For errors the form does not know about. |
 
-**How `aria-invalid` is set.** It is `"true"` when `grInvalid` is set, or when the classic-forms control the element is bound to (`NgControl`: `formControl`, `formControlName`, `ngModel`) is both **invalid and touched**, so a required field is not flagged before the user has reached it. `form.markAllAsTouched()` on a failed submit flags every field. `disabled` and `readonly` are the native attributes (use `formControl.disable()` for forms).
+**How `aria-invalid` is set.** It is `"true"` when `grInvalid` is set, or when the form control the element is bound to is both **invalid and touched**, so a required field is not flagged before the user has reached it. That works for `formControl`, `formControlName`, `ngModel` and for Signal Forms `[formField]` (Angular exposes the field to the directive as an `NgControl`). So `grInvalid` is **optional**: use it for errors the form does not know about (a server message) or to show the error before the field is touched. `form.markAllAsTouched()` on a failed submit flags every field. `disabled` and `readonly` are the native attributes (use `formControl.disable()` for forms).
 
-**Signal Forms.** The input is called `grInvalid`, not `invalid`, because `[formField]` writes the field's `invalid()` into any host input named `invalid`, touched or not. Drive it yourself:
+**Why `grInvalid` and not `invalid`.** `[formField]` writes the field's `invalid()` into any host input named `invalid`, touched or not, which would flag a pristine field on first render. `grInvalid` collides with nothing `[formField]` writes.
 
-```html
-<input
-  grTextField
-  id="name"
-  [formField]="f.name"
-  [grInvalid]="f.name().invalid() && f.name().touched()"
-/>
-```
-
-Use `grInvalid` and do not bind `[attr.aria-invalid]` on the same element: the directive owns that attribute. An `aria-invalid` written statically in the template is kept.
+Do not bind `[attr.aria-invalid]` on the same element: the directive owns that attribute. An `aria-invalid` written statically in the template is kept.
 
 **Announcing errors.** A screen reader announces an error that is **inserted after the page loaded** (on blur or submit) only if the element is a live region: give it `role="alert"`, as above. An error that is already in the page when it loads (server-rendered) must **not** have `role="alert"`, or it is announced on every load.
+
+## Checkbox
+
+Like the TextField, the Checkbox lives in its own entry point because it imports `@angular/forms`:
+
+```ts
+import { Component, signal } from '@angular/core';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { GrCheckbox } from '@grass-ds/angular/checkbox';
+
+@Component({
+  selector: 'app-example',
+  imports: [GrCheckbox, ReactiveFormsModule],
+  template: `
+    <div class="gr-field">
+      <label class="gr-checkbox-label">
+        <input type="checkbox" grCheckbox [formControl]="accepted" />
+        <span>Accept the terms</span>
+      </label>
+    </div>
+    <label class="gr-checkbox-label">
+      <input type="checkbox" grCheckbox [(indeterminate)]="partial" />
+      <span>Select all</span>
+    </label>
+  `,
+})
+export class Example {
+  readonly accepted = new FormControl(false, Validators.requiredTrue);
+  readonly partial = signal(true);
+}
+```
+
+`<input type="checkbox" grCheckbox>` stays native, so `formControl`, `formControlName`, `ngModel` and `[formField]` work with no `ControlValueAccessor`. The markup contract (the wrapping `.gr-checkbox-label`, hint, error and the `fieldset` field group) is in the `@grass-ds/css` README.
+
+| Input           | Type      | Default | Notes                                                                                                                                                 |
+| --------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `indeterminate` | `boolean` | `false` | Sets the DOM property (it has no attribute). The browser clears it when the user toggles; with `[(indeterminate)]` the cleared value is written back. |
+| `grInvalid`     | `boolean` | `false` | Sets `aria-invalid="true"`; optional with forms, as for the TextField.                                                                                |
+
+**Use `[(indeterminate)]` for select-all.** A one-way `[indeterminate]="x"` cannot put the box back into the mixed state after the user cleared it, if the value you bind did not change (it is still `true`, so Angular sees nothing to write). The two-way form receives the cleared value, so the next `true` is a change. Select-all example:
+
+```ts
+import { Component, computed, signal } from '@angular/core';
+import { GrCheckbox } from '@grass-ds/angular/checkbox';
+
+@Component({
+  selector: 'app-topics',
+  imports: [GrCheckbox],
+  template: `
+    <label class="gr-checkbox-label">
+      <input
+        type="checkbox"
+        grCheckbox
+        [checked]="all()"
+        [(indeterminate)]="partial"
+        (change)="setAll($any($event.target).checked)"
+      />
+      <span>Select all</span>
+    </label>
+    @for (topic of topics(); track topic.name) {
+      <label class="gr-checkbox-label">
+        <input type="checkbox" grCheckbox [checked]="topic.on" (change)="toggle(topic.name)" />
+        <span>{{ topic.name }}</span>
+      </label>
+    }
+  `,
+})
+export class Topics {
+  readonly topics = signal([
+    { name: 'Design tokens', on: true },
+    { name: 'Style layer', on: false },
+  ]);
+  readonly all = computed(() => this.topics().every((topic) => topic.on));
+  readonly partial = signal(true);
+
+  toggle(name: string) {
+    this.topics.update((list) => list.map((t) => (t.name === name ? { ...t, on: !t.on } : t)));
+    this.partial.set(!this.all() && this.topics().some((topic) => topic.on));
+  }
+
+  setAll(on: boolean) {
+    this.topics.update((list) => list.map((topic) => ({ ...topic, on })));
+    this.partial.set(false);
+  }
+}
+```
+
+`aria-invalid` follows the same rule as the TextField: `"true"` when `grInvalid` is set or the bound control is invalid **and touched** (reactive, template-driven and Signal Forms alike). Do not bind `[attr.aria-invalid]` on the element. Errors added after load need `role="alert"` (see TextField).
 
 The components work without zone.js, use `OnPush` and `ViewEncapsulation.None`, and add no styles. Browse them in the [Catalog](https://raphaelmdcoelho.github.io/grass-ds/).
