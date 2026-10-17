@@ -6,6 +6,6 @@
     "declarationMap": true,
     "types": []
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "text-field/**/*.ts"],
   "exclude": ["**/*.spec.ts"]
 }

@@ -25,6 +25,9 @@
       },
       "strong": {
         "$value": "{palette.olive.500}"
+      },
+      "strong-hover": {
+        "$value": "{palette.olive.300}"
       }
     },
     "action": {

@@ -8,7 +8,7 @@ Angular implementation of the Grass Design System. Components are standalone att
 npm install @grass-ds/angular @grass-ds/css @grass-ds/tokens
 ```
 
-`@grass-ds/css` and `@angular/core` are peer dependencies. Load the stylesheets once, for example in `angular.json` `styles`:
+`@grass-ds/css` and `@angular/core` are peer dependencies (`@angular/forms` is an optional one, needed only by `@grass-ds/angular/text-field`). Load the stylesheets once, for example in `angular.json` `styles`:
 
 ```json
 [
@@ -46,4 +46,64 @@ export class Example {}
 - **Disabled links**: a disabled `<a grButton>` keeps its `href` but gets `aria-disabled="true"` and stays focusable. Click, Ctrl-click, middle-click and Enter are cancelled before any `(click)` handler runs, so handlers never fire while it is disabled.
 - **Use the `disabled` input.** An `aria-disabled` or `type` written statically in the template is kept, but do not bind `[attr.aria-disabled]` or `[attr.type]` on the same element: the component owns those attributes.
 
-The component works without zone.js, uses `OnPush` and `ViewEncapsulation.None`, and adds no styles. Browse the components in the [Catalog](https://raphaelmdcoelho.github.io/grass-ds/).
+## TextField
+
+`@angular/forms` is an **optional** peer dependency: it is needed only by this entry point. `GrButton` comes from the package root, which never imports it, so a Button-only app does not need `@angular/forms` installed. Import the TextField from its own entry point:
+
+```ts
+import { Component } from '@angular/core';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { GrTextField } from '@grass-ds/angular/text-field';
+
+@Component({
+  selector: 'app-example',
+  imports: [GrTextField, ReactiveFormsModule],
+  template: `
+    <div class="gr-field">
+      <label class="gr-field__label" for="email">Email</label>
+      <p class="gr-field__hint" id="email-hint">We only use it to sign you in.</p>
+      <input
+        grTextField
+        id="email"
+        type="email"
+        [formControl]="email"
+        [attr.aria-describedby]="showError() ? 'email-hint email-error' : 'email-hint'"
+      />
+      @if (showError()) {
+        <p class="gr-field__error" id="email-error" role="alert">
+          Enter an address like name@example.com.
+        </p>
+      }
+    </div>
+  `,
+})
+export class Example {
+  readonly email = new FormControl('', [Validators.required, Validators.email]);
+  protected showError = () => this.email.touched && this.email.invalid;
+}
+```
+
+`<input grTextField>` and `<textarea grTextField>` stay native elements, so `formControl`, `formControlName`, `ngModel` and Signal Forms (`[formField]`) work with no setup and no `ControlValueAccessor` of ours. The label, hint and error are plain markup from `@grass-ds/css` (see its README for the contract). The label is required. List the hint in `aria-describedby`, and add the error id **only while the error is rendered**.
+
+| Input       | Type      | Default | Notes                                                                |
+| ----------- | --------- | ------- | -------------------------------------------------------------------- |
+| `grInvalid` | `boolean` | `false` | Sets `aria-invalid="true"`. For errors the form does not know about. |
+
+**How `aria-invalid` is set.** It is `"true"` when `grInvalid` is set, or when the classic-forms control the element is bound to (`NgControl`: `formControl`, `formControlName`, `ngModel`) is both **invalid and touched**, so a required field is not flagged before the user has reached it. `form.markAllAsTouched()` on a failed submit flags every field. `disabled` and `readonly` are the native attributes (use `formControl.disable()` for forms).
+
+**Signal Forms.** The input is called `grInvalid`, not `invalid`, because `[formField]` writes the field's `invalid()` into any host input named `invalid`, touched or not. Drive it yourself:
+
+```html
+<input
+  grTextField
+  id="name"
+  [formField]="f.name"
+  [grInvalid]="f.name().invalid() && f.name().touched()"
+/>
+```
+
+Use `grInvalid` and do not bind `[attr.aria-invalid]` on the same element: the directive owns that attribute. An `aria-invalid` written statically in the template is kept.
+
+**Announcing errors.** A screen reader announces an error that is **inserted after the page loaded** (on blur or submit) only if the element is a live region: give it `role="alert"`, as above. An error that is already in the page when it loads (server-rendered) must **not** have `role="alert"`, or it is announced on every load.
+
+The components work without zone.js, use `OnPush` and `ViewEncapsulation.None`, and add no styles. Browse them in the [Catalog](https://raphaelmdcoelho.github.io/grass-ds/).

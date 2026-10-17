@@ -79,6 +79,7 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 2. **0.2–0.x**: one component per release, each with its style layer CSS, Reference story, Angular directive or component and Angular story: 0.2 Angular foundations and Button, then TextField, Checkbox, Card and Dialog, then the drift check.
    - Focus ring composition (done in 0.2): the foundations focus ring is an outline plus an inner band drawn with `box-shadow`, so a component's own `box-shadow` would replace the band. The band is exposed as `--gr-focus-inner` (transparent unless the element itself has focus) and components must write `box-shadow: var(--gr-focus-inner), <own>`; a css test enforces it.
    - Dark elevation (done in 0.2): `elevation.overlay` is defined per theme; dark uses a stronger shadow plus a faint light edge.
+   - TextField (done in 0.3): `.gr-text-field` on `input` and `textarea` with a `.gr-field` wrapper (`__label`, `__hint`, `__error`) tied by `for`/`id` and `aria-describedby`. Invalid is `aria-invalid="true"` only (never `:user-invalid`, which assistive technology is not told about); in Angular it comes from a `grInvalid` input (not `invalid`, which Signal Forms write into) or from a touched, invalid `NgControl`. TextField lives in the `@grass-ds/angular/text-field` entry point so `@angular/forms` stays an optional peer. Native-backed, so forms need no `ControlValueAccessor`.
 3. **1.0**: all five components stable in Angular.
 
 ## Open points

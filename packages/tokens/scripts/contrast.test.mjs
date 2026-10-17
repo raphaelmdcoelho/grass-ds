@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { checkPairs } from './lib/contrast.mjs';
 import { runContrastCheck } from './lib/check.mjs';
 import { THEMES, resolvedTokens } from './lib/dictionary.mjs';
@@ -62,6 +63,42 @@ test('no action state background equals a surface in either theme', async () => 
       for (const [surfacePath, surface] of surfaces) {
         assert.notEqual(state, surface, `${theme}: ${statePath} is identical to ${surfacePath}`);
       }
+    }
+  }
+});
+
+test('every enabled text-field colour is contrast-paired and no border state equals a surface', async () => {
+  const field = JSON.parse(
+    await readFile(new URL('../src/component/text-field.json', import.meta.url), 'utf8'),
+  )['text-field'];
+  const contrast = JSON.parse(
+    await readFile(new URL('../src/contrast.json', import.meta.url), 'utf8'),
+  );
+  const paired = new Set(contrast.pairs.map((pair) => pair.fg));
+  const refs = (names) => names.map((name) => /^\{(.+)\}$/.exec(field[name].$value)[1]);
+
+  // Disabled is exempt from contrast (WCAG 1.4.3/1.4.11); everything a user can read or aim at is held to it.
+  const enabled = [
+    'foreground',
+    'placeholder',
+    'label',
+    'hint',
+    'error',
+    'border',
+    'border-hover',
+    'border-focus',
+    'border-invalid',
+    'border-read-only',
+  ];
+  for (const ref of refs(enabled)) assert.ok(paired.has(ref), `${ref} has no contrast pair`);
+
+  for (const theme of THEMES) {
+    const tokens = await resolvedTokens(theme);
+    const surfaces = Object.entries(tokens).filter(([path]) => path.startsWith('color.surface.'));
+    for (const name of Object.keys(field).filter((key) => key.startsWith('border'))) {
+      const ref = /^\{(.+)\}$/.exec(field[name].$value)[1];
+      for (const [surfacePath, surface] of surfaces)
+        assert.notEqual(tokens[ref], surface, `${theme}: text-field ${name} equals ${surfacePath}`);
     }
   }
 });

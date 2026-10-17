@@ -20,7 +20,10 @@
         },
         "test": {
           "builder": "@angular/build:unit-test",
-          "options": { "tsConfig": "tsconfig.spec.json" }
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "include": ["src/**/*.spec.ts", "../text-field/**/*.spec.ts"]
+          }
         }
       }
     }
