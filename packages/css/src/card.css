@@ -3,17 +3,19 @@
  * The element is the consumer's choice (div, article, section, li...), and so is the heading level.
  *
  *   <article class="gr-card" data-variant="elevated" aria-labelledby="plan-title">
- *     <header class="gr-card__header">
+ *     <div class="gr-card__header">
  *       <h3 class="gr-card__title" id="plan-title">Team plan</h3>
  *       <div class="gr-card__actions"><button class="gr-button" data-variant="secondary">Edit</button></div>
- *     </header>
+ *     </div>
  *     <div class="gr-card__media"><img src="..." alt="" /></div>
  *     <div class="gr-card__body">...</div>
- *     <footer class="gr-card__footer"><button class="gr-button">Choose plan</button></footer>
+ *     <div class="gr-card__footer"><button class="gr-button">Choose plan</button></div>
  *   </article>
  *
  * data-variant="outlined" (the default when absent) or "elevated". A card has no role of its own;
- * add one (role="group" or an article/section) only together with an accessible name. Add
+ * add one (role="group" or an article/section) only together with an accessible name. Use <header> and
+ * <footer> for the parts only inside an article, a section or role="article": elsewhere they become
+ * banner and contentinfo landmarks. Add
  * data-query to make the card a container for @container queries (opt-in: container-type traps
  * position: fixed descendants and creates a stacking context).
  */
@@ -40,6 +42,12 @@
     @media (forced-colors: active) {
       /* Fills and shadows are dropped in forced colours: the border carries the card's edge. */
       border-color: CanvasText;
+
+      /* A second ring outside the border tells elevated from outlined without changing the size. */
+      &[data-variant='elevated']:not(:focus-visible) {
+        outline: var(--gr-border-width) solid CanvasText;
+        outline-offset: var(--gr-border-width);
+      }
     }
   }
 
@@ -102,6 +110,9 @@
 
   .gr-card__footer {
     display: flex;
+
+    /* Pins the footer to the bottom even when the card has no body to take the spare height. */
+    margin-block-start: auto;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--gr-card-gap);

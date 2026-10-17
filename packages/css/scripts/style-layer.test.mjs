@@ -213,3 +213,16 @@ test('Card has its parts, an opt-in container, composes the focus band and keeps
   assert.doesNotMatch(card_rule, /^\s*overflow\s*:/m);
   assert.match(card, /@media \(forced-colors: active\)[\s\S]*border-color: CanvasText/);
 });
+
+test('Card pins its footer to the bottom even without a body, and elevated has a forced-colours cue', () => {
+  const card = css.slice(
+    css.indexOf('@layer grass.components {', css.indexOf('Card. Markup contract')),
+    css.indexOf('@layer grass.utilities'),
+  );
+  const footer = card.slice(card.indexOf('.gr-card__footer {'));
+  assert.match(footer, /margin-block-start: auto/);
+  assert.match(
+    card,
+    /forced-colors: active\)[\s\S]*\[data-variant=["']elevated["']\]:not\(:focus-visible\)[\s\S]*outline:/,
+  );
+});
