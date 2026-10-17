@@ -135,6 +135,54 @@ export class Example {
 | `indeterminate` | `boolean` | `false` | Sets the DOM property (it has no attribute). The browser clears it when the user toggles; with `[(indeterminate)]` the cleared value is written back. |
 | `grInvalid`     | `boolean` | `false` | Sets `aria-invalid="true"`; optional with forms, as for the TextField.                                                                                |
 
+**Use `[(indeterminate)]` for select-all.** A one-way `[indeterminate]="x"` cannot put the box back into the mixed state after the user cleared it, if the value you bind did not change (it is still `true`, so Angular sees nothing to write). The two-way form receives the cleared value, so the next `true` is a change. Select-all example:
+
+```ts
+import { Component, computed, signal } from '@angular/core';
+import { GrCheckbox } from '@grass-ds/angular/checkbox';
+
+@Component({
+  selector: 'app-topics',
+  imports: [GrCheckbox],
+  template: `
+    <label class="gr-checkbox-label">
+      <input
+        type="checkbox"
+        grCheckbox
+        [checked]="all()"
+        [(indeterminate)]="partial"
+        (change)="setAll($any($event.target).checked)"
+      />
+      <span>Select all</span>
+    </label>
+    @for (topic of topics(); track topic.name) {
+      <label class="gr-checkbox-label">
+        <input type="checkbox" grCheckbox [checked]="topic.on" (change)="toggle(topic.name)" />
+        <span>{{ topic.name }}</span>
+      </label>
+    }
+  `,
+})
+export class Topics {
+  readonly topics = signal([
+    { name: 'Design tokens', on: true },
+    { name: 'Style layer', on: false },
+  ]);
+  readonly all = computed(() => this.topics().every((topic) => topic.on));
+  readonly partial = signal(true);
+
+  toggle(name: string) {
+    this.topics.update((list) => list.map((t) => (t.name === name ? { ...t, on: !t.on } : t)));
+    this.partial.set(!this.all() && this.topics().some((topic) => topic.on));
+  }
+
+  setAll(on: boolean) {
+    this.topics.update((list) => list.map((topic) => ({ ...topic, on })));
+    this.partial.set(false);
+  }
+}
+```
+
 `aria-invalid` follows the same rule as the TextField: `"true"` when `grInvalid` is set or the bound control is invalid **and touched** (reactive, template-driven and Signal Forms alike). Do not bind `[attr.aria-invalid]` on the element. Errors added after load need `role="alert"` (see TextField).
 
 The components work without zone.js, use `OnPush` and `ViewEncapsulation.None`, and add no styles. Browse them in the [Catalog](https://raphaelmdcoelho.github.io/grass-ds/).
