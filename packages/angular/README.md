@@ -8,7 +8,7 @@ Angular implementation of the Grass Design System. Components are standalone att
 npm install @grass-ds/angular @grass-ds/css @grass-ds/tokens
 ```
 
-`@grass-ds/css` and `@angular/core` are peer dependencies (`@angular/forms` is an optional one, needed only by `@grass-ds/angular/text-field`). Load the stylesheets once, for example in `angular.json` `styles`:
+`@grass-ds/css` and `@angular/core` are peer dependencies. `@angular/forms` is an optional one, needed only by the entry points that touch forms (`@grass-ds/angular/text-field`, `@grass-ds/angular/checkbox`); an app created without it needs `npm install @angular/forms` before using them. Load the stylesheets once, for example in `angular.json` `styles`:
 
 ```json
 [
@@ -89,20 +89,11 @@ export class Example {
 | ----------- | --------- | ------- | -------------------------------------------------------------------- |
 | `grInvalid` | `boolean` | `false` | Sets `aria-invalid="true"`. For errors the form does not know about. |
 
-**How `aria-invalid` is set.** It is `"true"` when `grInvalid` is set, or when the classic-forms control the element is bound to (`NgControl`: `formControl`, `formControlName`, `ngModel`) is both **invalid and touched**, so a required field is not flagged before the user has reached it. `form.markAllAsTouched()` on a failed submit flags every field. `disabled` and `readonly` are the native attributes (use `formControl.disable()` for forms).
+**How `aria-invalid` is set.** It is `"true"` when `grInvalid` is set, or when the form control the element is bound to is both **invalid and touched**, so a required field is not flagged before the user has reached it. That works for `formControl`, `formControlName`, `ngModel` and for Signal Forms `[formField]` (Angular exposes the field to the directive as an `NgControl`). So `grInvalid` is **optional**: use it for errors the form does not know about (a server message) or to show the error before the field is touched. `form.markAllAsTouched()` on a failed submit flags every field. `disabled` and `readonly` are the native attributes (use `formControl.disable()` for forms).
 
-**Signal Forms.** The input is called `grInvalid`, not `invalid`, because `[formField]` writes the field's `invalid()` into any host input named `invalid`, touched or not. Drive it yourself:
+**Why `grInvalid` and not `invalid`.** `[formField]` writes the field's `invalid()` into any host input named `invalid`, touched or not, which would flag a pristine field on first render. `grInvalid` collides with nothing `[formField]` writes.
 
-```html
-<input
-  grTextField
-  id="name"
-  [formField]="f.name"
-  [grInvalid]="f.name().invalid() && f.name().touched()"
-/>
-```
-
-Use `grInvalid` and do not bind `[attr.aria-invalid]` on the same element: the directive owns that attribute. An `aria-invalid` written statically in the template is kept.
+Do not bind `[attr.aria-invalid]` on the same element: the directive owns that attribute. An `aria-invalid` written statically in the template is kept.
 
 **Announcing errors.** A screen reader announces an error that is **inserted after the page loaded** (on blur or submit) only if the element is a live region: give it `role="alert"`, as above. An error that is already in the page when it loads (server-rendered) must **not** have `role="alert"`, or it is announced on every load.
 
