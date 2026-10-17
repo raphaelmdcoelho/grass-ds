@@ -97,4 +97,44 @@ Do not bind `[attr.aria-invalid]` on the same element: the directive owns that a
 
 **Announcing errors.** A screen reader announces an error that is **inserted after the page loaded** (on blur or submit) only if the element is a live region: give it `role="alert"`, as above. An error that is already in the page when it loads (server-rendered) must **not** have `role="alert"`, or it is announced on every load.
 
+## Checkbox
+
+Like the TextField, the Checkbox lives in its own entry point because it imports `@angular/forms`:
+
+```ts
+import { Component, signal } from '@angular/core';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { GrCheckbox } from '@grass-ds/angular/checkbox';
+
+@Component({
+  selector: 'app-example',
+  imports: [GrCheckbox, ReactiveFormsModule],
+  template: `
+    <div class="gr-field">
+      <label class="gr-checkbox-label">
+        <input type="checkbox" grCheckbox [formControl]="accepted" />
+        <span>Accept the terms</span>
+      </label>
+    </div>
+    <label class="gr-checkbox-label">
+      <input type="checkbox" grCheckbox [(indeterminate)]="partial" />
+      <span>Select all</span>
+    </label>
+  `,
+})
+export class Example {
+  readonly accepted = new FormControl(false, Validators.requiredTrue);
+  readonly partial = signal(true);
+}
+```
+
+`<input type="checkbox" grCheckbox>` stays native, so `formControl`, `formControlName`, `ngModel` and `[formField]` work with no `ControlValueAccessor`. The markup contract (the wrapping `.gr-checkbox-label`, hint, error and the `fieldset` field group) is in the `@grass-ds/css` README.
+
+| Input           | Type      | Default | Notes                                                                                                                                                 |
+| --------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `indeterminate` | `boolean` | `false` | Sets the DOM property (it has no attribute). The browser clears it when the user toggles; with `[(indeterminate)]` the cleared value is written back. |
+| `grInvalid`     | `boolean` | `false` | Sets `aria-invalid="true"`; optional with forms, as for the TextField.                                                                                |
+
+`aria-invalid` follows the same rule as the TextField: `"true"` when `grInvalid` is set or the bound control is invalid **and touched** (reactive, template-driven and Signal Forms alike). Do not bind `[attr.aria-invalid]` on the element. Errors added after load need `role="alert"` (see TextField).
+
 The components work without zone.js, use `OnPush` and `ViewEncapsulation.None`, and add no styles. Browse them in the [Catalog](https://raphaelmdcoelho.github.io/grass-ds/).

@@ -46,6 +46,14 @@ _Avoid_: Base, core, globals
 A reusable UI element (Button, TextField…) whose appearance is defined once in the style layer.
 _Avoid_: Widget, control
 
+**Field**:
+A form control together with its label and optional hint and error text, laid out by `.gr-field` and tied together with `for`/`id` and `aria-describedby`.
+_Avoid_: Form group, input wrapper, form row
+
+**Field group**:
+A fieldset with a legend that names several related fields (a set of checkboxes), laid out by `.gr-field-group`. The legend is its label.
+_Avoid_: Checkbox group, fieldset wrapper, section
+
 **Markup contract**:
 The exact elements, classes and attributes a component must render for the style layer to style it; every implementation renders the same markup contract.
 _Avoid_: Template, API, structure
