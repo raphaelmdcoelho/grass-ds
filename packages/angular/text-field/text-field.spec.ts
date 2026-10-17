@@ -129,6 +129,20 @@ describe('GrTextField', () => {
       expect(input.value).toBe('from the model');
     });
 
+    it('works without grInvalid: null before blur, true after, null once valid', async () => {
+      const { get, host, settle } = await setup();
+      const input = get('signal');
+      expect(input.getAttribute('aria-invalid')).toBeNull();
+      input.dispatchEvent(new Event('blur'));
+      await settle();
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+      input.value = 'ok';
+      input.dispatchEvent(new Event('input'));
+      await settle();
+      expect(host.signalForm.name().invalid()).toBe(false);
+      expect(input.getAttribute('aria-invalid')).toBeNull();
+    });
+
     it('shows invalid once the field is touched when grInvalid is driven from the field state', async () => {
       const { get, host, settle } = await setup();
       const input = get('signal-driven');
