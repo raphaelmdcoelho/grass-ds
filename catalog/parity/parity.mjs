@@ -6,7 +6,7 @@
  *   pnpm build:catalog && pnpm parity
  *
  * Needs the composed site in catalog/site (build:catalog) and a Chromium: set CHROMIUM_PATH to
- * a browser binary, or run `npx playwright-core install chromium` once. Not part of `pnpm test`
+ * a browser binary, or run `pnpm --filter @grass-ds/catalog-parity exec playwright-core install chromium` once. Not part of `pnpm test`
  * or CI yet because it needs a browser and the built site.
  *
  * Determinism: reduced motion is emulated, transitions, animations and the caret are switched off,
@@ -104,6 +104,15 @@ const same = (a, b) => {
   return x.width === y.width && x.height === y.height && Buffer.compare(x.data, y.data) === 0;
 };
 
+/** A page that failed to render (or a wrong URL) is blank: two blank shots would otherwise "match". */
+const isBlank = (png) => {
+  const { data } = PNG.sync.read(png);
+  let different = 0;
+  for (let i = 4; i < data.length; i += 4)
+    if (data[i] !== data[0] || data[i + 1] !== data[1] || data[i + 2] !== data[2]) different++;
+  return different < 50;
+};
+
 const space = async (page) => {
   const isCheckbox = await page.evaluate(() =>
     document.activeElement?.matches('input[type=checkbox]'),
@@ -113,16 +122,26 @@ const space = async (page) => {
 
 const server = await serve();
 const origin = `http://127.0.0.1:${server.address().port}`;
-const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM_PATH || undefined,
-  args: [
-    '--no-sandbox',
-    '--disable-gpu',
-    '--disable-lcd-text',
-    '--font-render-hinting=none',
-    '--force-device-scale-factor=1',
-  ],
-});
+const browser = await chromium
+  .launch({
+    executablePath: process.env.CHROMIUM_PATH || undefined,
+    args: [
+      '--no-sandbox',
+      '--disable-gpu',
+      '--disable-lcd-text',
+      '--font-render-hinting=none',
+      '--force-device-scale-factor=1',
+    ],
+  })
+  .catch((error) => {
+    console.error(
+      `Could not start Chromium: ${error.message.split('\n')[0]}\n` +
+        'Set CHROMIUM_PATH to a Chromium binary, or install one with:\n' +
+        '  pnpm --filter @grass-ds/catalog-parity exec playwright-core install chromium',
+    );
+    server.close();
+    process.exit(1);
+  });
 
 const index = async (base) => (await (await fetch(`${origin}${base}/index.json`)).json()).entries;
 const ids = (entries) =>
@@ -162,9 +181,10 @@ for (const theme of ['light', 'dark']) {
       }
       steps.forEach((_, i) => {
         compared++;
-        if (same(shots[''][i], shots['/angular'][i])) return;
+        const blank = isBlank(shots[''][i]) || isBlank(shots['/angular'][i]);
+        if (!blank && same(shots[''][i], shots['/angular'][i])) return;
         const name = `${id}-${theme}${forced ? '-forced' : ''}${i ? '-space' : ''}`;
-        failures.push(`${name}`);
+        failures.push(blank ? `${name} (blank screenshot)` : name);
         if (OUT)
           pending.push(
             mkdir(OUT, { recursive: true }).then(() =>
@@ -182,6 +202,10 @@ await Promise.all(pending);
 await browser.close();
 server.close();
 
+if (compared === 0) {
+  console.error(`No screenshot pair was compared (PARITY_ONLY=${ONLY ?? ''} matched no story).`);
+  process.exit(1);
+}
 console.log(
   `${compared} screenshot pairs compared (${selected.length} stories x 2 themes x 2 colour modes, plus Space states).`,
 );
