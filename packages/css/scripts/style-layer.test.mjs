@@ -156,7 +156,7 @@ test('TextField: invalid is declared after read-only, so an invalid read-only fi
 });
 
 test('Checkbox draws its mark in CSS, covers every state and keeps the three states apart in forced colours', () => {
-  const checkbox = css.slice(css.indexOf('Checkbox. Markup contract'));
+  const checkbox = section('Checkbox', 'Card');
   assert.match(checkbox, /appearance: none/);
   assert.doesNotMatch(checkbox, /url\(/);
   for (const state of ['&:checked', '&:indeterminate', '&:focus-visible', '&:disabled'])
@@ -195,4 +195,21 @@ test('Focus in forced colours uses a system colour and drops the inner band', ()
 test('Checkbox: a disabled label is GrayText in forced colours', () => {
   const label = css.slice(css.indexOf('.gr-checkbox-label {'), css.indexOf('.gr-checkbox-label ~'));
   assert.match(label, /&:has\(:disabled\)[\s\S]*forced-colors: active[\s\S]*color: GrayText/);
+});
+
+test('Card has its parts, an opt-in container, composes the focus band and keeps its edge in forced colours', () => {
+  const card = css.slice(
+    css.indexOf('@layer grass.components {', css.indexOf('Card. Markup contract')),
+    css.indexOf('@layer grass.utilities'),
+  );
+  for (const part of ['header', 'title', 'actions', 'media', 'body', 'footer'])
+    assert.match(card, new RegExp(`\\.gr-card__${part}\\b`));
+  assert.match(card, /&\[data-variant=["']elevated["']\]/);
+  // Opt-in only: container-type traps position: fixed descendants.
+  assert.match(card, /&\[data-query\]\s*\{\s*container-type: inline-size/);
+  assert.equal((card.match(/container-type:/g) ?? []).length, 1);
+  // overflow: hidden on the card would clip the focus rings of the controls inside it.
+  const card_rule = card.slice(card.indexOf('.gr-card {'), card.indexOf('.gr-card__header'));
+  assert.doesNotMatch(card_rule, /^\s*overflow\s*:/m);
+  assert.match(card, /@media \(forced-colors: active\)[\s\S]*border-color: CanvasText/);
 });
