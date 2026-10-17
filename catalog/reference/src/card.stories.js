@@ -72,6 +72,18 @@ export const WithMedia = {
     ),
 };
 
+/** Without role="article" the parts are divs: a header or footer element would become a landmark. */
+export const PlainDivs = {
+  name: 'As plain divs',
+  render: () =>
+    page(`
+    <div class="gr-card">
+      <div class="gr-card__header"><h3 class="gr-card__title">Plain card</h3></div>
+      <div class="gr-card__body">${TEXT}</div>
+      <div class="gr-card__footer">${button('Choose plan')}</div>
+    </div>`),
+};
+
 export const Variants = {
   name: 'Outlined and elevated',
   render: () =>
@@ -114,6 +126,7 @@ export const InAGrid = {
         ${card({ id: 'g1', title: 'Free', body: TEXT, footer: button('Choose') })}
         ${card({ id: 'g2', variant: 'elevated', title: 'Team', body: `${TEXT}${TEXT}${TEXT}`, footer: button('Choose') })}
         ${card({ id: 'g3', title: 'Business', media: true, body: TEXT, footer: button('Choose') })}
+        ${card({ id: 'g4', title: 'No body', footer: button('Choose') })}
       </div>
     </div>`,
 };
