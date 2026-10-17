@@ -93,18 +93,19 @@ A group of related checkboxes is a **field group**: a `fieldset` with a `legend`
 
 ```html
 <article class="gr-card" data-variant="elevated" aria-labelledby="plan-title">
-  <header class="gr-card__header">
+  <div class="gr-card__header">
     <h3 class="gr-card__title" id="plan-title">Team plan</h3>
     <div class="gr-card__actions">
       <button class="gr-button" data-variant="secondary">Edit</button>
     </div>
-  </header>
+  </div>
   <div class="gr-card__media"><img src="meadow.jpg" alt="" /></div>
   <div class="gr-card__body">...</div>
-  <footer class="gr-card__footer"><button class="gr-button">Choose plan</button></footer>
+  <div class="gr-card__footer"><button class="gr-button">Choose plan</button></div>
 </article>
 ```
 
+- **`header` and `footer` elements**: use `div`s for the header and footer, as above. A `<header>` or `<footer>` that is not inside an `<article>`, `<section>` or `role="article"` becomes a **banner** or **contentinfo landmark**, and ten cards would add ten of each. Use the semantic elements only when the card itself is an `article`, a `section` or has `role="article"`.
 - **Variants**: `data-variant="outlined"` (the default) or `"elevated"` (a soft shadow from the per-theme elevation token). Both keep the border, which is what shows in forced colours.
 - **Layout**: the card is a flex column, so it works in `.gr-stack` and `.gr-grid`; the body takes the spare height, so footers line up across a grid row. The media is full width and rounded only at the card's corners (the card does not clip its content, so focus rings of controls inside are never cut off).
 - **Query container**: add `data-query` to make the card a container for `@container` queries. It is opt-in because `container-type` makes the element a containing block for `position: fixed` descendants and a stacking context.

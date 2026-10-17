@@ -1,6 +1,6 @@
 # @grass-ds/angular
 
-Angular implementation of the Grass Design System. Components are standalone attribute components on native elements (`<button grButton>`), styled entirely by [`@grass-ds/css`](https://www.npmjs.com/package/@grass-ds/css); this package owns behaviour, never appearance.
+Angular implementation of the Grass Design System. Components are standalone attribute components on native elements (`<button grButton>`) and composite elements (`<gr-card>`), styled entirely by [`@grass-ds/css`](https://www.npmjs.com/package/@grass-ds/css); this package owns behaviour, never appearance.
 
 ## Install
 
@@ -59,12 +59,12 @@ import { GR_CARD, GrButton } from '@grass-ds/angular';
   imports: [GR_CARD, GrButton],
   template: `
     <gr-card variant="elevated" role="article" aria-labelledby="plan-title">
-      <header grCardHeader>
+      <div grCardHeader>
         <h3 grCardTitle id="plan-title">Team plan</h3>
         <div grCardActions><button grButton variant="secondary">Edit</button></div>
-      </header>
+      </div>
       <div grCardBody>...</div>
-      <footer grCardFooter><button grButton>Choose plan</button></footer>
+      <div grCardFooter><button grButton>Choose plan</button></div>
     </gr-card>
   `,
 })
@@ -77,6 +77,7 @@ export class Plan {}
 | --------- | -------------------------- | ------------ | --------------------------- |
 | `variant` | `'outlined' \| 'elevated'` | `'outlined'` | Rendered as `data-variant`. |
 
+- **`header` and `footer` elements**: a `<header>` or `<footer>` that is not inside an `<article>`, `<section>` (named) or `role="article"` is exposed as a **banner** or **contentinfo landmark**, so ten plain cards would add ten banners. Use `<div grCardHeader>` and `<div grCardFooter>`, as above, and use `<header>`/`<footer>` only when the card itself is an `article`, a `section` or has `role="article"`.
 - **Heading level**: `grCardTitle` goes on whichever heading element fits your page (`<h2>`, `<h3>`...); the card never picks one.
 - **Semantics**: the `<gr-card>` host has no role. Add `role="article"` (or `group`/`region`) **together with** `aria-labelledby` pointing at the title, or leave it as a plain container. Attributes you write on the host are kept. For a list of cards, put each in an `<li>`.
 - **Not interactive as a whole**: do not make the card a link or button, and do not nest interactive cards; put actions in the header or footer. Left out of 1.0: clickable or selectable cards, a horizontal layout.
