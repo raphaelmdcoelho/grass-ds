@@ -1,6 +1,6 @@
 # @grass-ds/angular
 
-Angular implementation of the Grass Design System. Components are standalone attribute components on native elements (`<button grButton>`), styled entirely by [`@grass-ds/css`](https://www.npmjs.com/package/@grass-ds/css); this package owns behaviour, never appearance.
+Angular implementation of the Grass Design System. Components are standalone attribute components on native elements (`<button grButton>`) and composite elements (`<gr-card>`), styled entirely by [`@grass-ds/css`](https://www.npmjs.com/package/@grass-ds/css); this package owns behaviour, never appearance.
 
 ## Install
 
@@ -45,6 +45,42 @@ export class Example {}
 - **`type`**: `<button grButton>` defaults to `type="button"` (as in the Reference), so it does not submit a form by accident. Write `type="submit"` or `type="reset"` statically to override it.
 - **Disabled links**: a disabled `<a grButton>` keeps its `href` but gets `aria-disabled="true"` and stays focusable. Click, Ctrl-click, middle-click and Enter are cancelled before any `(click)` handler runs, so handlers never fire while it is disabled.
 - **Use the `disabled` input.** An `aria-disabled` or `type` written statically in the template is kept, but do not bind `[attr.aria-disabled]` or `[attr.type]` on the same element: the component owns those attributes.
+
+## Card
+
+The Card is a composite, so it is an element, `<gr-card>`, with its parts as attribute directives on elements **you** choose. It needs no `@angular/forms` and comes from the package root:
+
+```ts
+import { Component } from '@angular/core';
+import { GR_CARD, GrButton } from '@grass-ds/angular';
+
+@Component({
+  selector: 'app-plan',
+  imports: [GR_CARD, GrButton],
+  template: `
+    <gr-card variant="elevated" role="article" aria-labelledby="plan-title">
+      <div grCardHeader>
+        <h3 grCardTitle id="plan-title">Team plan</h3>
+        <div grCardActions><button grButton variant="secondary">Edit</button></div>
+      </div>
+      <div grCardBody>...</div>
+      <div grCardFooter><button grButton>Choose plan</button></div>
+    </gr-card>
+  `,
+})
+export class Plan {}
+```
+
+`GR_CARD` bundles `GrCard`, `GrCardHeader`, `GrCardTitle`, `GrCardActions`, `GrCardMedia`, `GrCardBody` and `GrCardFooter`; import them individually if you prefer. Each part directive only adds its `gr-card__*` class (`<div grCardMedia><img alt="" /></div>` for media), and `<gr-card>` renders no wrapper, so the output is the markup of the `@grass-ds/css` Card contract, pixel for pixel.
+
+| Input     | Type                       | Default      | Notes                       |
+| --------- | -------------------------- | ------------ | --------------------------- |
+| `variant` | `'outlined' \| 'elevated'` | `'outlined'` | Rendered as `data-variant`. |
+
+- **`header` and `footer` elements**: a `<header>` or `<footer>` that is not inside an `<article>`, `<section>` (named) or `role="article"` is exposed as a **banner** or **contentinfo landmark**, so ten plain cards would add ten banners. Use `<div grCardHeader>` and `<div grCardFooter>`, as above, and use `<header>`/`<footer>` only when the card itself is an `article`, a `section` or has `role="article"`.
+- **Heading level**: `grCardTitle` goes on whichever heading element fits your page (`<h2>`, `<h3>`...); the card never picks one.
+- **Semantics**: the `<gr-card>` host has no role. Add `role="article"` (or `group`/`region`) **together with** `aria-labelledby` pointing at the title, or leave it as a plain container. Attributes you write on the host are kept. For a list of cards, put each in an `<li>`.
+- **Not interactive as a whole**: do not make the card a link or button, and do not nest interactive cards; put actions in the header or footer. Left out of 1.0: clickable or selectable cards, a horizontal layout.
 
 ## TextField
 

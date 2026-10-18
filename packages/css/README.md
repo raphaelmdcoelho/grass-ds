@@ -87,6 +87,31 @@ A group of related checkboxes is a **field group**: a `fieldset` with a `legend`
 - **Contrast**: the checked fill is not enough on its own to meet 3:1 on white, so the box keeps its strong border when checked; the border and the mark are contrast-checked in both themes.
 - **Forced colours** use system colours (`Field`, `Highlight`, `HighlightText`) so an empty box, a tick and a dash stay distinct.
 
+## Card
+
+`.gr-card` goes on **any element**: use a `div`, an `article`, a `section` or an `li`, whichever the content means. Its parts are optional, in this order, each a class on any element (so the heading level is yours):
+
+```html
+<article class="gr-card" data-variant="elevated" aria-labelledby="plan-title">
+  <div class="gr-card__header">
+    <h3 class="gr-card__title" id="plan-title">Team plan</h3>
+    <div class="gr-card__actions">
+      <button class="gr-button" data-variant="secondary">Edit</button>
+    </div>
+  </div>
+  <div class="gr-card__media"><img src="meadow.jpg" alt="" /></div>
+  <div class="gr-card__body">...</div>
+  <div class="gr-card__footer"><button class="gr-button">Choose plan</button></div>
+</article>
+```
+
+- **`header` and `footer` elements**: use `div`s for the header and footer, as above. A `<header>` or `<footer>` that is not inside an `<article>`, `<section>` or `role="article"` becomes a **banner** or **contentinfo landmark**, and ten cards would add ten of each. Use the semantic elements only when the card itself is an `article`, a `section` or has `role="article"`.
+- **Variants**: `data-variant="outlined"` (the default) or `"elevated"` (a soft shadow from the per-theme elevation token). Both keep the border, which is what shows in forced colours.
+- **Layout**: the card is a flex column, so it works in `.gr-stack` and `.gr-grid`; the body takes the spare height, so footers line up across a grid row. The media is full width and rounded only at the card's corners (the card does not clip its content, so focus rings of controls inside are never cut off).
+- **Query container**: add `data-query` to make the card a container for `@container` queries. It is opt-in because `container-type` makes the element a containing block for `position: fixed` descendants and a stacking context.
+- **Accessibility**: put a heading in the header and pick its level for the page. A card has no role: add `role` (or use `article`/`section`) **only together with an accessible name** (`aria-labelledby` the title), because an unnamed region is noise for screen readers. Do not make the whole card a link or button, and do not nest interactive cards: put the actions in the header or footer. Text on the card is contrast-checked against `surface.raised` in both themes.
+- **Left out of 1.0 on purpose**: a clickable or selectable whole card (it needs a stretched-link or radio/checkbox pattern with its own focus and nesting rules), a horizontal layout (a media-beside-body variant: it needs container-driven rules and a second contract), and a muted subtitle part. They can be added without breaking this contract.
+
 ## Theming
 
 The OS preference applies by default; force a theme with `data-theme="light"` or `data-theme="dark"` on the `<html>` element. Scoped themes are not supported.

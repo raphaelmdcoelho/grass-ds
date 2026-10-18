@@ -1,7 +1,7 @@
 {
   "name": "@grass-ds/angular",
   "version": "0.0.0-development",
-  "description": "Grass Design System Angular implementation: attribute components on native elements, styled by @grass-ds/css.",
+  "description": "Angular implementation of the Grass Design System: attribute components on native elements and composite elements, styled by @grass-ds/css.",
   "license": "MIT",
   "homepage": "https://raphaelmdcoelho.github.io/grass-ds/",
   "keywords": [
