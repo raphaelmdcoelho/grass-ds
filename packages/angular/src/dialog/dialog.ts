@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -82,15 +83,20 @@ export class GrDialog {
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('dialog');
   private pressedOnBackdrop = false;
   private destroyed = false;
+  private opener: HTMLElement | null = null;
+  private readonly document = inject(DOCUMENT);
   private readonly titleId = signal<string | null>(null);
   protected readonly labelledby = computed(() => (this.label() ? null : this.titleId()));
 
   constructor() {
-    // Destroyed while open: close it, so the browser returns focus to the opener instead of the body.
+    // Destroyed while open: Angular has already detached the dialog, so the browser cannot return focus
+    // to the opener by itself. Close it, then do what it would have done.
     inject(DestroyRef).onDestroy(() => {
       this.destroyed = true;
       const element = this.dialog()?.nativeElement;
-      if (element?.open) element.close();
+      if (!element?.open) return;
+      element.close();
+      if (this.opener?.isConnected) this.opener.focus();
     });
     effect(() => {
       const element = this.dialog()?.nativeElement;
@@ -99,6 +105,7 @@ export class GrDialog {
       if (wanted && !element.open && element.isConnected) {
         // The native returnValue survives a later close without one, such as Escape: reset it.
         element.returnValue = '';
+        this.opener = this.document.activeElement as HTMLElement | null;
         element.showModal();
         if (isDevMode()) this.warnIfUnnamed();
       } else if (!wanted && element.open) element.close();

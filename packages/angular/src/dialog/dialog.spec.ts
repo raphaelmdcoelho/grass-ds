@@ -200,18 +200,22 @@ describe('GrDialog', () => {
     expect(dialogOf('backdrop').open).toBe(true);
   });
 
-  it('closes an open dialog when it is destroyed, so focus can return to the opener', async () => {
+  it('closes an open dialog when it is destroyed and returns focus to its opener', async () => {
     const { fixture, host, get } = await setup();
+    const opener = get('#opener');
+    opener.focus();
     const late = fixture.debugElement.children.find((c) => c.nativeElement.id === 'late')!
       .componentInstance as GrDialog;
     late.showModal();
     await fixture.whenStable();
     const dialog = get<HTMLDialogElement>('#late > dialog');
     const close = vi.spyOn(dialog, 'close');
+    opener.blur();
     host.lazy.set(false);
     await fixture.whenStable();
     expect(close).toHaveBeenCalledTimes(1);
     expect(dialog.open).toBe(false);
+    expect(document.activeElement).toBe(opener);
   });
 
   it('warns in dev mode when an open dialog has neither a title nor a label', async () => {
