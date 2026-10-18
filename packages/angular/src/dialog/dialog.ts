@@ -4,7 +4,6 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
-  Renderer2,
   ViewEncapsulation,
   booleanAttribute,
   computed,
@@ -151,17 +150,23 @@ export class GrDialog {
 export class GrDialogHeader {}
 
 /**
- * `.gr-dialog__title`: put it on the heading element that fits the page. It names the dialog: it gets
- * an id if it has none, and the dialog points `aria-labelledby` at it. Write a static `id`, not a binding.
+ * `.gr-dialog__title`: put it on the heading element that fits the page. It names the dialog: the
+ * dialog points `aria-labelledby` at its id, which is the `id` you write (static or bound) or, without
+ * one, a generated id. It registers with the `<gr-dialog>` it is written inside; inside another
+ * component's template it does not, so name that dialog with `label` instead.
  */
-@Directive({ selector: '[grDialogTitle]', host: { class: 'gr-dialog__title' } })
+@Directive({
+  selector: '[grDialogTitle]',
+  host: { class: 'gr-dialog__title', '[attr.id]': 'resolvedId()' },
+})
 export class GrDialogTitle {
+  readonly id = input<string>();
+  private readonly generatedId = `gr-dialog-title-${nextTitleId++}`;
+  protected readonly resolvedId = computed(() => this.id() || this.generatedId);
+
   constructor() {
-    const element: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     const dialog = inject(GrDialog, { optional: true });
-    if (!element.id)
-      inject(Renderer2).setAttribute(element, 'id', `gr-dialog-title-${nextTitleId++}`);
-    dialog?.registerTitle(element.id);
+    effect(() => dialog?.registerTitle(this.resolvedId()));
     inject(DestroyRef).onDestroy(() => dialog?.registerTitle(null));
   }
 }

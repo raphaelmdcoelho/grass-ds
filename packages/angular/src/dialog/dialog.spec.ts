@@ -18,6 +18,7 @@ import { GR_DIALOG, GrDialog } from './dialog';
       </form>
     </gr-dialog>
     <gr-dialog id="auto" label="Labelled"><div grDialogBody>Auto</div></gr-dialog>
+    <gr-dialog id="bound"><h2 grDialogTitle [id]="titleId()">Bound</h2></gr-dialog>
     <gr-dialog id="generated"><h2 grDialogTitle>Generated</h2></gr-dialog>
     <gr-dialog id="backdrop" closeOnBackdrop><div grDialogBody>Backdrop</div></gr-dialog>
     @if (lazy()) {
@@ -28,6 +29,7 @@ import { GR_DIALOG, GrDialog } from './dialog';
 class Host {
   readonly isOpen = signal(false);
   readonly lazy = signal(true);
+  readonly titleId = signal('first-id');
   readonly values: string[] = [];
 }
 
@@ -81,6 +83,16 @@ describe('GrDialog', () => {
     expect(dialogOf('generated').getAttribute('aria-labelledby')).toBe(generated.id);
     expect(dialogOf('auto').getAttribute('aria-label')).toBe('Labelled');
     expect(dialogOf('auto').hasAttribute('aria-labelledby')).toBe(false);
+  });
+
+  it('follows a bound title id, so aria-labelledby never dangles', async () => {
+    const { fixture, host, get, dialogOf } = await setup();
+    expect(get('#bound h2').id).toBe('first-id');
+    expect(dialogOf('bound').getAttribute('aria-labelledby')).toBe('first-id');
+    host.titleId.set('second-id');
+    await fixture.whenStable();
+    expect(get('#bound h2').id).toBe('second-id');
+    expect(dialogOf('bound').getAttribute('aria-labelledby')).toBe('second-id');
   });
 
   it('opens with showModal() when the model turns true and closes when it turns false', async () => {
