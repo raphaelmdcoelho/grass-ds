@@ -167,3 +167,19 @@ test('text, muted text and links are contrast-paired on the card surface', async
     assert.equal(pair.level, 'text');
   }
 });
+
+test('text, muted text and links are contrast-paired on the dialog surface', async () => {
+  const dialog = JSON.parse(
+    await readFile(new URL('../src/component/dialog.json', import.meta.url), 'utf8'),
+  )['dialog'];
+  const contrast = JSON.parse(
+    await readFile(new URL('../src/contrast.json', import.meta.url), 'utf8'),
+  );
+  const ref = (name) => /^\{(.+)\}$/.exec(dialog[name].$value)[1];
+  const background = ref('background');
+  for (const fg of [ref('foreground'), 'color.text.muted', 'color.link.default']) {
+    const pair = contrast.pairs.find((p) => p.fg === fg && p.bg === background);
+    assert.ok(pair, `${fg} is not paired with the dialog background ${background}`);
+    assert.equal(pair.level, 'text');
+  }
+});

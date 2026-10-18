@@ -31,6 +31,15 @@
     },
     "icon-md": {
       "$value": "1.25rem"
+    },
+    "measure-sm": {
+      "$value": "24rem"
+    },
+    "measure-md": {
+      "$value": "32rem"
+    },
+    "measure-lg": {
+      "$value": "48rem"
     }
   }
 }
