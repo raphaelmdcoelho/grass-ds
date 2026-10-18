@@ -214,6 +214,24 @@ describe('GrDialog', () => {
     expect(dialog.open).toBe(false);
   });
 
+  it('warns in dev mode when an open dialog has neither a title nor a label', async () => {
+    const { fixture } = await setup();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const instance = (id: string) =>
+      fixture.debugElement.children.find((c) => c.nativeElement.id === id)!
+        .componentInstance as GrDialog;
+    instance('backdrop').showModal(); // no title, no label
+    await fixture.whenStable();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toMatch(/no accessible name/);
+    warn.mockClear();
+    instance('main').showModal(); // titled
+    instance('auto').showModal(); // labelled
+    await fixture.whenStable();
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
   it('content is created with the parent even while closed, and @if inside works', async () => {
     const { fixture, host, get } = await setup();
     expect(get('#content')).not.toBeNull();

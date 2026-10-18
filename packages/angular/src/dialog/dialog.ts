@@ -3,11 +3,14 @@ import {
   Component,
   DestroyRef,
   Directive,
+  Injector,
+  afterNextRender,
   ElementRef,
   ViewEncapsulation,
   booleanAttribute,
   computed,
   effect,
+  isDevMode,
   inject,
   input,
   model,
@@ -97,8 +100,24 @@ export class GrDialog {
         // The native returnValue survives a later close without one, such as Escape: reset it.
         element.returnValue = '';
         element.showModal();
+        if (isDevMode()) this.warnIfUnnamed();
       } else if (!wanted && element.open) element.close();
     });
+  }
+
+  private readonly injector = inject(Injector);
+
+  // After the next render, so a grDialogTitle that registers in the same cycle is counted.
+  private warnIfUnnamed(): void {
+    afterNextRender(
+      () => {
+        if (!this.label() && !this.titleId())
+          console.warn(
+            'gr-dialog: an open dialog has no accessible name. Add a grDialogTitle inside it, or set the label input.',
+          );
+      },
+      { injector: this.injector },
+    );
   }
 
   /** Opens the dialog as a modal. */
