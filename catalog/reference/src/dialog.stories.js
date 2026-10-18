@@ -100,7 +100,7 @@ export const FormWithReturnValue = {
           </label>
         </div>
       </div>`,
-        footer: `${button('Cancel', 'secondary', 'type="submit" value="cancel" formnovalidate')}${button('Invite', 'primary', 'type="submit" value="invite"')}`,
+        footer: `${button('Cancel', 'secondary', 'type="submit" value="cancel" formnovalidate autofocus')}${button('Invite', 'primary', 'type="submit" value="invite"')}`,
       }) + '<p style="margin: 0">Closed with: <output>nothing</output></p>',
     ),
   play: open,
