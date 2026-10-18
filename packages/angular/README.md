@@ -133,6 +133,11 @@ Methods, used through a template reference (`#confirm`) or `viewChild`: `showMod
 - **Content and `@if`**: the content is created together with the parent view, also while the dialog is closed, so a component inside it is already running. To create it only when needed, wrap it in `@if (isOpen())` (with `[(open)]`) or `@if (confirm.open())`; `@if` inside `<gr-dialog>` works as anywhere else.
 - **Focus**: the native behaviour is kept and nothing is added: initial focus goes to the first focusable element or the `autofocus` one (use `autofocus` on Cancel in a destructive confirmation), and closing returns focus to the opener. Open the dialog from a user action, never on page load.
 - **Backdrop click and Escape**: Escape always closes. `closeOnBackdrop` is opt-in and is never the only way out.
+- **Not supported in 1.0**: `role="alertdialog"` and `aria-describedby`. Attributes written on `<gr-dialog>` land on the `display: contents` host, not on the native dialog, so they do nothing; a forwarding input can be added later. Name the dialog with `grDialogTitle` or `label` only.
+- **Title in another component**: `grDialogTitle` registers with the `<gr-dialog>` it is written inside. A title that lives in another component's template does not register: set `label` on the dialog instead. In dev mode an open dialog with neither a title nor a label logs a warning.
+- **Scroll lock**: while open, the page does not scroll (`html:has(.gr-dialog:modal) { overflow: hidden }` in the `grass.components` layer). Add `scrollbar-gutter: stable` to `html` to avoid the sideways shift when the page scrollbar disappears. An unlayered `html { overflow: ... }` rule in your own CSS beats the lock, because unlayered styles win over layers.
+- **Enter in a form**: pressing Enter in a field submits the form with its **first** submit button, so order the buttons accordingly, and put `autofocus` on the least destructive one (Cancel) in a destructive confirmation.
+- **Tested in**: Chromium. Firefox, Safari and screen readers are not yet verified by me.
 - **Rendered DOM**: `<gr-dialog>` has `display: contents` and contains exactly the Reference markup, `<dialog class="gr-dialog">` with your parts as direct children.
 - **Left out of 1.0**: non-modal dialogs, drawers and side sheets, nested dialogs, an alertdialog variant, and a close icon (see the CSS README).
 
