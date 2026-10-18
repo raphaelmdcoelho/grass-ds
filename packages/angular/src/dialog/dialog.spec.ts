@@ -156,6 +156,7 @@ describe('GrDialog', () => {
     instance.showModal();
     await fixture.whenStable();
     // jsdom has no closedBy and no layout: the box is 0x0 at the origin, so (5, 5) is outside it.
+    dialog.dispatchEvent(new Event('pointerdown', { bubbles: true }));
     dialog.dispatchEvent(new MouseEvent('click', { clientX: 5, clientY: 5, bubbles: true }));
     await fixture.whenStable();
     expect(dialog.open).toBe(false);
@@ -168,6 +169,20 @@ describe('GrDialog', () => {
     instance.showModal();
     await fixture.whenStable();
     get('#backdrop .gr-dialog__body').dispatchEvent(
+      new MouseEvent('click', { clientX: 5, clientY: 5, bubbles: true }),
+    );
+    expect(dialogOf('backdrop').open).toBe(true);
+  });
+
+  it('a press that starts inside the dialog and is released over the backdrop does not close it', async () => {
+    const { fixture, get, dialogOf } = await setup();
+    const instance = fixture.debugElement.children.find((c) => c.nativeElement.id === 'backdrop')!
+      .componentInstance as GrDialog;
+    instance.showModal();
+    await fixture.whenStable();
+    // A text selection dragged out of the body: pointerdown on a part, the click lands on the dialog.
+    get('#backdrop .gr-dialog__body').dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    dialogOf('backdrop').dispatchEvent(
       new MouseEvent('click', { clientX: 5, clientY: 5, bubbles: true }),
     );
     expect(dialogOf('backdrop').open).toBe(true);

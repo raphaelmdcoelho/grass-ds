@@ -52,6 +52,7 @@ let nextTitleId = 0;
     [attr.aria-label]="label() ?? null"
     [attr.closedby]="closeOnBackdrop() ? 'any' : null"
     (close)="onClose()"
+    (pointerdown)="onPointerDown($event)"
     (click)="onClick($event)"
   >
     <ng-content />
@@ -77,6 +78,7 @@ export class GrDialog {
   readonly closed = output<string>();
 
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('dialog');
+  private pressedOnBackdrop = false;
   private readonly titleId = signal<string | null>(null);
   protected readonly labelledby = computed(() => (this.label() ? null : this.titleId()));
 
@@ -115,14 +117,22 @@ export class GrDialog {
     this.closed.emit(this.dialog()?.nativeElement.returnValue ?? '');
   }
 
+  protected onPointerDown(event: PointerEvent): void {
+    this.pressedOnBackdrop = event.target === this.dialog()?.nativeElement;
+  }
+
   protected onClick(event: MouseEvent): void {
     const element = this.dialog()?.nativeElement;
+    const pressed = this.pressedOnBackdrop;
+    this.pressedOnBackdrop = false;
     // Fallback for browsers without closedby. The dialog has no padding of its own, so a click that
-    // targets the dialog element itself, outside its box, is a click on the backdrop.
+    // targets the dialog element itself, outside its box, is a click on the backdrop. The press must
+    // have started there too: a text selection dragged out of the dialog ends in a click on it.
     if (
       !element ||
       !this.closeOnBackdrop() ||
       Reflect.has(element, 'closedBy') ||
+      !pressed ||
       event.target !== element
     )
       return;
