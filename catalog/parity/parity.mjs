@@ -182,6 +182,26 @@ const repaint = async (page) => {
 };
 
 /**
+ * Even after a full repaint, Chromium's software rasteriser very occasionally (a few captures in a
+ * hundred) anti-aliases a rounded corner one level differently. A capture is therefore repeated,
+ * with a full repaint in between, until two consecutive screenshots are identical (at most five).
+ * A real drift is the same every time and is unaffected; noise does not repeat itself.
+ */
+async function stableScreenshot(page) {
+  const shoot = async () => {
+    await repaint(page);
+    return page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' });
+  };
+  let previous = await shoot();
+  for (let attempt = 1; attempt < 5; attempt++) {
+    const next = await shoot();
+    if (Buffer.compare(previous, next) === 0) return next;
+    previous = next;
+  }
+  return previous;
+}
+
+/**
  * A focused text field blinks its caret. `caret-color: transparent` hides it, but forced colours
  * override that colour, so in forced colours the content box of the focused field (where the caret
  * is drawn, never the border, padding or focus ring) is blanked in the comparison on both sides.
@@ -236,10 +256,8 @@ async function capture(page, base, id, { theme, forced }, state, reload) {
     const [[name, arg]] = Object.entries(step);
     await STEPS[name](page, arg);
   }
-  await repaint(page);
   const mask = forced ? await page.evaluate(FOCUSED_TEXT_BOX) : null;
-  const png = await page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' });
-  return { png, mask };
+  return { png: await stableScreenshot(page), mask };
 }
 
 const decode = ({ png, mask }) => {
