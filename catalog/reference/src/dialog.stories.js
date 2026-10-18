@@ -10,7 +10,7 @@ const TEXT =
   '<p style="margin: 0">Dialogs interrupt the page to ask for a decision. The text inside keeps the surface contrast of the theme.</p>';
 
 const button = (label, variant = 'primary', extra = '') =>
-  `<button class="gr-button" type="button" data-variant="${variant}" ${extra}>${label}</button>`;
+  `<button class="gr-button" ${extra.includes('type=') ? '' : 'type="button"'} data-variant="${variant}" ${extra}>${label}</button>`;
 
 const dialog = ({ id, size, closedby, title, body, footer, form = false }) => {
   const header = `<div class="gr-dialog__header"><h2 class="gr-dialog__title" id="${id}-title">${title}</h2></div>`;
@@ -45,7 +45,7 @@ const open = async ({ canvasElement }) => {
   canvasElement.querySelector('dialog').showModal();
 };
 
-const actionsOk = `${button('Cancel', 'secondary', 'value="cancel"')}${button('Save', 'primary', 'value="save"')}`;
+const actionsOk = `${button('Cancel', 'secondary', 'type="submit" value="cancel"')}${button('Save', 'primary', 'type="submit" value="save"')}`;
 
 export const Basic = {
   render: () =>
@@ -100,7 +100,7 @@ export const FormWithReturnValue = {
           </label>
         </div>
       </div>`,
-        footer: `${button('Cancel', 'secondary', 'value="cancel" formnovalidate')}${button('Invite', 'primary', 'value="invite"')}`,
+        footer: `${button('Cancel', 'secondary', 'type="submit" value="cancel" formnovalidate')}${button('Invite', 'primary', 'type="submit" value="invite"')}`,
       }) + '<p style="margin: 0">Closed with: <output>nothing</output></p>',
     ),
   play: open,
@@ -116,9 +116,10 @@ export const LongContent = {
         title: 'Terms of service',
         body: Array.from(
           { length: 14 },
-          (_, i) => `<p style="margin: 0 0 1rem">Section ${i + 1}. ${TEXT.slice(3, -4)}</p>`,
+          (_, i) =>
+            `<p style="margin: 0 0 1rem">Section ${i + 1}. Dialogs interrupt the page to ask for a decision. The text inside keeps the surface contrast of the theme.</p>`,
         ).join(''),
-        footer: `${button('Decline', 'secondary', 'value="decline"')}${button('Accept', 'primary', 'value="accept"')}`,
+        footer: `${button('Decline', 'secondary', 'type="submit" value="decline"')}${button('Accept', 'primary', 'type="submit" value="accept"')}`,
       }),
     ),
   play: open,
@@ -135,7 +136,7 @@ export const DestructiveConfirm = {
         size: 'sm',
         title: 'Delete project?',
         body: '<p style="margin: 0">This permanently deletes “Meadow” and its 12 files. This cannot be undone.</p>',
-        footer: `${button('Cancel', 'secondary', 'value="cancel" autofocus')}${button('Delete project', 'danger', 'value="delete"')}`,
+        footer: `${button('Cancel', 'secondary', 'type="submit" value="cancel" autofocus')}${button('Delete project', 'danger', 'type="submit" value="delete"')}`,
       }),
     ),
   play: open,
@@ -152,7 +153,7 @@ export const CloseOnBackdropClick = {
         closedby: 'any',
         title: 'Quick look',
         body: '<p style="margin: 0">Click outside this dialog to close it.</p>',
-        footer: button('Close', 'secondary', 'value="close"'),
+        footer: button('Close', 'secondary', 'type="submit" value="close"'),
       }),
     ),
   play: open,
