@@ -78,10 +78,17 @@ export class GrDialog {
 
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('dialog');
   private pressedOnBackdrop = false;
+  private destroyed = false;
   private readonly titleId = signal<string | null>(null);
   protected readonly labelledby = computed(() => (this.label() ? null : this.titleId()));
 
   constructor() {
+    // Destroyed while open: close it, so the browser returns focus to the opener instead of the body.
+    inject(DestroyRef).onDestroy(() => {
+      this.destroyed = true;
+      const element = this.dialog()?.nativeElement;
+      if (element?.open) element.close();
+    });
     effect(() => {
       const element = this.dialog()?.nativeElement;
       const wanted = this.open();
@@ -112,6 +119,7 @@ export class GrDialog {
   }
 
   protected onClose(): void {
+    if (this.destroyed) return;
     this.open.set(false);
     this.closed.emit(this.dialog()?.nativeElement.returnValue ?? '');
   }

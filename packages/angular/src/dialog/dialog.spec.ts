@@ -200,6 +200,20 @@ describe('GrDialog', () => {
     expect(dialogOf('backdrop').open).toBe(true);
   });
 
+  it('closes an open dialog when it is destroyed, so focus can return to the opener', async () => {
+    const { fixture, host, get } = await setup();
+    const late = fixture.debugElement.children.find((c) => c.nativeElement.id === 'late')!
+      .componentInstance as GrDialog;
+    late.showModal();
+    await fixture.whenStable();
+    const dialog = get<HTMLDialogElement>('#late > dialog');
+    const close = vi.spyOn(dialog, 'close');
+    host.lazy.set(false);
+    await fixture.whenStable();
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(dialog.open).toBe(false);
+  });
+
   it('content is created with the parent even while closed, and @if inside works', async () => {
     const { fixture, host, get } = await setup();
     expect(get('#content')).not.toBeNull();
