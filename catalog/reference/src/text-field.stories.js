@@ -126,7 +126,12 @@ export const DynamicError = {
     const input = canvasElement.querySelector('#dynamic');
     input.addEventListener('blur', () => {
       const error = canvasElement.querySelector('#dynamic-error');
-      if (input.value) return error?.remove();
+      if (input.value) {
+        error?.remove();
+        input.removeAttribute('aria-invalid');
+        input.removeAttribute('aria-describedby');
+        return;
+      }
       input.setAttribute('aria-invalid', 'true');
       input.setAttribute('aria-describedby', 'dynamic-error');
       if (!error) {
