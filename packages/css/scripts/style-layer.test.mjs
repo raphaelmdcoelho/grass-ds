@@ -226,3 +226,21 @@ test('Card pins its footer to the bottom even without a body, and elevated has a
     /forced-colors: active\)[\s\S]*\[data-variant=["']elevated["']\]:not\(:focus-visible\)[\s\S]*outline:/,
   );
 });
+
+test('Dialog: parts, transitions that keep the exit visible, scroll lock, focus band and forced-colours border', () => {
+  const dialog = css.slice(
+    css.indexOf('@layer grass.components {', css.indexOf('Dialog (modal only)')),
+    css.indexOf('@layer grass.utilities'),
+  );
+  for (const part of ['header', 'title', 'actions', 'body', 'footer'])
+    assert.match(dialog, new RegExp(`\\.gr-dialog__${part}\\b`));
+  // display is set only while open: a rule that always sets it would keep a closed dialog on screen.
+  const base = dialog.slice(dialog.indexOf('.gr-dialog {'), dialog.indexOf("&[data-size='sm']"));
+  assert.doesNotMatch(base, /^\s*display\s*:/m);
+  assert.match(dialog, /&\[open\]\s*\{\s*display: flex/);
+  assert.match(dialog, /overlay[^;]*allow-discrete/);
+  assert.match(dialog, /display[^;]*allow-discrete/);
+  assert.match(dialog, /@starting-style/);
+  assert.match(dialog, /html:has\(\.gr-dialog:modal\)\s*\{\s*overflow: hidden/);
+  assert.match(dialog, /@media \(forced-colors: active\)[\s\S]*border-color: CanvasText/);
+});
