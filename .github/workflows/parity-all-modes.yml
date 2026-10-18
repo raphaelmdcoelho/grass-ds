@@ -1,0 +1,49 @@
+name: Parity (all modes)
+
+# Not a pull request check and not required: the drift check of ci.yml runs the interaction states in
+# light and dark-forced only, to stay fast. Weekly (and on demand) this runs them in all four modes,
+# so a drift that only shows in dark or in light forced colours is found within a week.
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity-all-modes:
+    name: Parity (all modes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PARITY_OUT: ${{ github.workspace }}/parity-out
+      PARITY_CONCURRENCY: 4
+      PARITY_STATE_MODES: light,dark,light-forced,dark-forced
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:catalog
+      - name: Read the playwright-core version
+        id: playwright
+        run: echo "version=$(pnpm --filter @grass-ds/catalog-parity exec node -p "require('playwright-core/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache the Chromium browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - name: Install Chromium and its system libraries
+        run: pnpm --filter @grass-ds/catalog-parity exec playwright-core install --with-deps chromium
+      - run: pnpm parity
+      - name: Upload the mismatching screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-mismatches
+          path: parity-out
+          if-no-files-found: ignore

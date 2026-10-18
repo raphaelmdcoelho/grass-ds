@@ -70,11 +70,15 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:catalog
+      # The browser build depends only on the playwright-core version, not on the whole lockfile.
+      - name: Read the playwright-core version
+        id: playwright
+        run: echo "version=$(pnpm --filter @grass-ds/catalog-parity exec node -p "require('playwright-core/package.json').version")" >> "$GITHUB_OUTPUT"
       - name: Cache the Chromium browser
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       # With a warm cache this only checks the browser; --with-deps always installs the system
       # libraries, which the cache does not cover.
       - name: Install Chromium and its system libraries

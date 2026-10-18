@@ -56,7 +56,7 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 ## Catalog
 
 - One Storybook site, run locally and published to GitHub Pages. It composes a framework-free Reference Storybook (`@storybook/html-vite`, the Vite framework package for the HTML renderer) with the Angular Storybook ([ADR 0006](./adr/0006-catalog-composes-reference-and-implementation-storybooks.md)).
-- Drift check (done): `pnpm parity` renders every `Components/*` story of both Storybooks in Chromium, in both themes and in forced colours, and requires identical pixels. Besides first paint it drives the interaction states each story declares in `catalog/parity/states.mjs` (hover, active, keyboard focus, clicks, Escape, backdrop) with the same steps on both sides, and it fails on a story missing from one side, a story with no declared states or a step a side cannot perform. It is the `Parity` job of CI, to be added to the required checks of the `main` ruleset by the owner once this has merged.
+- Drift check (done): `pnpm parity` renders every `Components/*` story of both Storybooks in Chromium, in both themes and in forced colours, and requires identical pixels. Besides first paint it drives the interaction states each story declares in `catalog/parity/states.mjs` (hover, active, keyboard focus, clicks, Escape, backdrop) with the same steps on both sides, and compares each story's accessibility tree (Playwright aria snapshot plus accessible description and states) as text. It fails on a story missing from one side, a story with no declared states or a step a side cannot perform. It is the `Parity` job of CI, to be added to the required checks of the `main` ruleset by the owner once this has merged.
 
 ## Repo & tooling
 
