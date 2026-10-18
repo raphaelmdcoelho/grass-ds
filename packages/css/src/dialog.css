@@ -141,6 +141,18 @@
     padding: var(--gr-dialog-padding);
     overflow-y: auto;
     overscroll-behavior: contain;
+
+    /* A scrolling body is focusable, and the default ring would be drawn over the header and footer dividers. */
+    &:focus-visible {
+      outline-offset: calc(-1 * var(--gr-border-focus-width));
+
+      --gr-focus-inner: inset 0 0 0 calc(2 * var(--gr-border-focus-width))
+        var(--gr-color-focus-ring-inner);
+
+      @media (forced-colors: active) {
+        --gr-focus-inner: 0 0 0 0 transparent;
+      }
+    }
   }
 
   .gr-dialog__footer {
