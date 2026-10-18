@@ -82,6 +82,60 @@ export class Plan {}
 - **Semantics**: the `<gr-card>` host has no role. Add `role="article"` (or `group`/`region`) **together with** `aria-labelledby` pointing at the title, or leave it as a plain container. Attributes you write on the host are kept. For a list of cards, put each in an `<li>`.
 - **Not interactive as a whole**: do not make the card a link or button, and do not nest interactive cards; put actions in the header or footer. Left out of 1.0: clickable or selectable cards, a horizontal layout.
 
+## Dialog
+
+The Dialog is a composite, so it is an element, `<gr-dialog>`, with its parts as attribute directives on elements **you** choose. It wraps a native `<dialog class="gr-dialog">` that it opens with `showModal()` (modal only in 1.0), so the browser provides the top layer, the backdrop, the inert page behind it, Escape, and moving focus in and back to the element that opened it. It needs no `@angular/forms` and no CDK.
+
+```ts
+import { Component } from '@angular/core';
+import { GR_DIALOG, GrButton } from '@grass-ds/angular';
+
+@Component({
+  selector: 'app-delete',
+  imports: [GR_DIALOG, GrButton],
+  template: `
+    <button grButton (click)="confirm.showModal()">Delete project</button>
+
+    <gr-dialog #confirm size="sm" (closed)="onClosed($event)">
+      <div grDialogHeader>
+        <h2 grDialogTitle>Delete project?</h2>
+      </div>
+      <div grDialogBody>This permanently deletes "Meadow". This cannot be undone.</div>
+      <form method="dialog" grDialogFooter>
+        <button grButton variant="secondary" type="submit" value="cancel" autofocus>Cancel</button>
+        <button grButton variant="danger" type="submit" value="delete">Delete project</button>
+      </form>
+    </gr-dialog>
+  `,
+})
+export class DeleteProject {
+  onClosed(returnValue: string) {
+    if (returnValue === 'delete') this.delete();
+  }
+  delete() {}
+}
+```
+
+`GR_DIALOG` bundles `GrDialog`, `GrDialogHeader`, `GrDialogTitle`, `GrDialogActions`, `GrDialogBody` and `GrDialogFooter`.
+
+| Input / output    | Type                   | Default | Notes                                                                                                     |
+| ----------------- | ---------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `open`            | `model<boolean>`       | `false` | Two-way: `[(open)]="isOpen"`. Escape, a submitting form and `close()` write `false` back.                 |
+| `size`            | `'sm' \| 'md' \| 'lg'` | `'md'`  | Rendered as `data-size`.                                                                                  |
+| `label`           | `string`               | none    | Accessible name for a dialog without a `grDialogTitle`. A title names the dialog by itself.               |
+| `closeOnBackdrop` | `boolean`              | `false` | Sets the native `closedby="any"`; where the browser lacks it, a click handler closes on a backdrop click. |
+| `closed`          | `output<string>`       |         | Emits the `returnValue` on every close: the `value` of the submitting button, else `''`.                  |
+
+Methods, used through a template reference (`#confirm`) or `viewChild`: `showModal()` and `close(returnValue?)`.
+
+- **Name**: `grDialogTitle` goes on the heading element that fits your page (`<h2>`, `<h3>`...); the dialog never picks a level. It gives the title an id (yours if you wrote a static one) and points `aria-labelledby` at it. Without a title, set `label`.
+- **Return value**: put `grDialogFooter` on a `<form method="dialog">` (or wrap the body and the footer in one), and give its buttons `type="submit"` and a `value`: `grButton` defaults to `type="button"`, which never submits. `closed` emits that value; it is reset to `''` each time the dialog opens, so an Escape never reports the previous answer.
+- **Content and `@if`**: the content is created together with the parent view, also while the dialog is closed, so a component inside it is already running. To create it only when needed, wrap it in `@if (isOpen())` (with `[(open)]`) or `@if (confirm.open())`; `@if` inside `<gr-dialog>` works as anywhere else.
+- **Focus**: the native behaviour is kept and nothing is added: initial focus goes to the first focusable element or the `autofocus` one (use `autofocus` on Cancel in a destructive confirmation), and closing returns focus to the opener. Open the dialog from a user action, never on page load.
+- **Backdrop click and Escape**: Escape always closes. `closeOnBackdrop` is opt-in and is never the only way out.
+- **Rendered DOM**: `<gr-dialog>` has `display: contents` and contains exactly the Reference markup, `<dialog class="gr-dialog">` with your parts as direct children.
+- **Left out of 1.0**: non-modal dialogs, drawers and side sheets, nested dialogs, an alertdialog variant, and a close icon (see the CSS README).
+
 ## TextField
 
 `@angular/forms` is an **optional** peer dependency: it is needed only by this entry point. `GrButton` comes from the package root, which never imports it, so a Button-only app does not need `@angular/forms` installed. Import the TextField from its own entry point:

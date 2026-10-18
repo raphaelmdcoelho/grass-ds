@@ -62,6 +62,18 @@ _Avoid_: Container component, widget
 A bordered surface that groups related content and actions, made of optional parts: header (title and actions), media, body and footer. It has no role of its own and is never interactive as a whole.
 _Avoid_: Tile, panel, box
 
+**Dialog**:
+A modal surface that interrupts the page to ask for a decision, made of optional parts (header with title, body, footer with actions) on a native `<dialog>` opened with `showModal()`. It is always named by its title and is the first component with behaviour, all of it native (Escape, backdrop, inert page, focus in and back). Non-modal dialogs, drawers and nested dialogs are not part of 1.0.
+_Avoid_: Modal, popup, lightbox, overlay
+
+**Return value**:
+What a Dialog reports when it closes: the `value` of the button that submitted its `<form method="dialog">` (`dialog.returnValue`), or empty when it was dismissed without one.
+_Avoid_: Result, response
+
+**Backdrop dismissal**:
+Closing a Dialog by clicking outside it. Opt-in per dialog (`closedby="any"`), never the only way to close it.
+_Avoid_: Light dismiss, click-away
+
 **Markup contract**:
 The exact elements, classes and attributes a component must render for the style layer to style it; every implementation renders the same markup contract.
 _Avoid_: Template, API, structure

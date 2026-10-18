@@ -112,6 +112,50 @@ A group of related checkboxes is a **field group**: a `fieldset` with a `legend`
 - **Accessibility**: put a heading in the header and pick its level for the page. A card has no role: add `role` (or use `article`/`section`) **only together with an accessible name** (`aria-labelledby` the title), because an unnamed region is noise for screen readers. Do not make the whole card a link or button, and do not nest interactive cards: put the actions in the header or footer. Text on the card is contrast-checked against `surface.raised` in both themes.
 - **Left out of 1.0 on purpose**: a clickable or selectable whole card (it needs a stretched-link or radio/checkbox pattern with its own focus and nesting rules), a horizontal layout (a media-beside-body variant: it needs container-driven rules and a second contract), and a muted subtitle part. They can be added without breaking this contract.
 
+## Dialog
+
+`dialog.gr-dialog` is a native `<dialog>` that you open with `showModal()`. It is **modal only** in 1.0. The browser provides the top layer, the backdrop, making the page behind it inert, Escape, and moving focus in and back to the control that opened it, so this layer adds no script. Its parts are optional, in this order; the footer can be a `<form method="dialog">` to return a value.
+
+```html
+<button class="gr-button" id="open">Delete project</button>
+
+<dialog class="gr-dialog" id="confirm" data-size="sm" aria-labelledby="confirm-title">
+  <div class="gr-dialog__header">
+    <h2 class="gr-dialog__title" id="confirm-title">Delete project?</h2>
+  </div>
+  <div class="gr-dialog__body">This permanently deletes "Meadow". This cannot be undone.</div>
+  <form method="dialog" class="gr-dialog__footer">
+    <button class="gr-button" data-variant="secondary" type="submit" value="cancel" autofocus>
+      Cancel
+    </button>
+    <button class="gr-button" data-variant="danger" type="submit" value="delete">
+      Delete project
+    </button>
+  </form>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('confirm');
+  document.getElementById('open').addEventListener('click', () => dialog.showModal());
+  dialog.addEventListener('close', () => {
+    if (dialog.returnValue === 'delete') deleteProject();
+  });
+</script>
+```
+
+- **Name (required)**: a dialog always has an accessible name: `aria-labelledby` pointing at the title, or `aria-label`. The heading level of `.gr-dialog__title` is yours to pick; it is styled by class.
+- **Sizes**: `data-size="sm"`, `"md"` (the default) or `"lg"`. The width never exceeds the viewport minus the gutter, and the body scrolls (the header and footer stay in view) when the dialog is taller than the viewport.
+- **Return value**: a `<form method="dialog">` closes the dialog when submitted and sets `dialog.returnValue` to the `value` of the submit button. Give the buttons `type="submit"` (`.gr-button` on a `<button>` without a `type` submits, but Angular's `grButton` defaults to `type="button"`, so be explicit in both). The form may wrap the body and the footer, as a direct child of the dialog, instead of being the footer itself. Browsers keep the previous `returnValue` when a dialog is closed without one (Escape, `close()`): reset it before opening if you rely on it (`dialog.returnValue = ''`).
+- **Escape** closes the dialog (the native `cancel` and `close` events fire). Do not call `preventDefault()` on `cancel` without giving the user another way out.
+- **Backdrop click** does not close the dialog unless you opt in with `closedby="any"`. `closedby` is not yet Baseline: Chromium-based browsers support it (134+), others ignore it and the dialog then closes only by Escape or its buttons, so never make a backdrop click the only way out. Leave the default (`closerequest`) alone; `closedby="none"` would remove Escape. The dialog has no padding of its own (its parts have), so if you add your own fallback, a click whose target is the dialog element itself is a click on the backdrop.
+- **Initial focus**: the browser focuses the first focusable element, or the one marked `autofocus`. Put `autofocus` on the safe action in a destructive confirmation (Cancel) so that a stray Enter does not delete. In a dialog whose body scrolls, the scrolling body can be the first focusable element: put `autofocus` on the control you want instead, or on the title with `tabindex="-1"`.
+- **Focus return**: closing returns focus to the element that was focused when `showModal()` ran. Open the dialog from a user action on a control, never on page load: a dialog nobody asked for is a dead end for a screen-reader user, and focus has nowhere to return to. If that control was removed, move focus yourself in the `close` handler.
+- **Destructive confirmation**: say what will happen in the title (a question) and name the action on the button ("Delete project", not "OK" or "Yes"); use `data-variant="danger"` for it and keep Cancel next to it.
+- **Scroll lock**: while a modal dialog is open the page does not scroll (`overflow: hidden` on `html`). The page's own scrollbar disappearing shifts it sideways by the scrollbar width on platforms with classic scrollbars; add `scrollbar-gutter: stable` to `html` if that matters to you.
+- **Motion**: the dialog fades and slides in and out with `@starting-style` and `transition-behavior: allow-discrete` (`display` and the top-layer `overlay` transition too, so the exit is visible). Durations are tokens and collapse to 0 under `prefers-reduced-motion`.
+- **Forced colours**: the backdrop and the shadow vanish, so the border (and the header and footer dividers) is drawn in `CanvasText`.
+- **Left out of 1.0 on purpose**: non-modal dialogs (`show()`, which needs positioning and focus rules of its own), drawers and side sheets, nested dialogs (a second `showModal()` works natively but has no designed stacking), `role="alertdialog"` (add it yourself on a confirmation if you want it announced as an alert; the styles do not change), and a close icon button (the library has no icons yet: use a text button in `.gr-dialog__actions` or the footer).
+
 ## Theming
 
 The OS preference applies by default; force a theme with `data-theme="light"` or `data-theme="dark"` on the `<html>` element. Scoped themes are not supported.
