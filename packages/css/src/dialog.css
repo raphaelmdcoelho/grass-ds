@@ -27,7 +27,8 @@
   .gr-dialog {
     box-sizing: border-box;
 
-    /* The UA centres a modal dialog with inset: 0 and margin: auto; the sizes below only cap it. */
+    /* The UA centres a modal dialog with inset: 0 and margin: auto; the reset layer zeroes the margin. */
+    margin: auto;
     inline-size: min(var(--gr-dialog-width-md), 100% - 2 * var(--gr-dialog-gutter));
     max-inline-size: none;
     max-block-size: calc(100% - 2 * var(--gr-dialog-gutter));
@@ -88,7 +89,7 @@
     }
 
     /* A form around the body and the footer must not break the column. */
-    > form {
+    > form:not(.gr-dialog__footer) {
       display: contents;
     }
 
