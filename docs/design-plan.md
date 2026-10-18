@@ -56,7 +56,7 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 ## Catalog
 
 - One Storybook site, run locally and published to GitHub Pages. It composes a framework-free Reference Storybook (`@storybook/html-vite`, the Vite framework package for the HTML renderer) with the Angular Storybook ([ADR 0006](./adr/0006-catalog-composes-reference-and-implementation-storybooks.md)).
-- Drift check: Playwright visual snapshots compare Angular stories with the matching Reference stories in both themes. Added once the v1 components exist.
+- Drift check (done): `pnpm parity` renders every `Components/*` story of both Storybooks in Chromium, in both themes and in forced colours, and requires identical pixels. Besides first paint it drives the interaction states each story declares in `catalog/parity/states.mjs` (hover, active, keyboard focus, clicks, Escape, backdrop) with the same steps on both sides, and it fails on a story missing from one side, a story with no declared states or a step a side cannot perform. It is the `Parity` job of CI, to be added to the required checks of the `main` ruleset by the owner once this has merged.
 
 ## Repo & tooling
 
@@ -69,7 +69,7 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 
 ## CI/CD (GitHub Actions)
 
-- Every PR: build, token contrast check, unit tests, commitlint over every commit in the PR (hooks can be bypassed locally), and later the drift check.
+- Every PR: build, token contrast check, unit tests, commitlint over every commit in the PR (hooks can be bypassed locally), and the drift check (`Parity`, a required check once the owner adds it to the ruleset).
 - Merges to `main` keep every commit (merge or rebase, no squash), so each commit must be a valid Conventional Commit.
 - On merge to `main`: semantic-release derives the version from the commits, sets it on every package, tags, publishes to npm with provenance, and deploys the Catalog to GitHub Pages.
 
@@ -81,7 +81,8 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
    - Dark elevation (done in 0.2): `elevation.overlay` is defined per theme; dark uses a stronger shadow plus a faint light edge.
    - TextField (done in 0.3): `.gr-text-field` on `input` and `textarea` with a `.gr-field` wrapper (`__label`, `__hint`, `__error`) tied by `for`/`id` and `aria-describedby`. Invalid is `aria-invalid="true"` only (never `:user-invalid`, which assistive technology is not told about); in Angular it comes from a `grInvalid` input (not `invalid`, which Signal Forms write into) or from a touched, invalid `NgControl`. TextField lives in the `@grass-ds/angular/text-field` entry point so `@angular/forms` stays an optional peer. Native-backed, so forms need no `ControlValueAccessor`.
    - Checkbox (done in 0.4): `.gr-checkbox` on `input[type=checkbox]` (`appearance: none`, CSS-drawn tick and dash), wrapped by `.gr-checkbox-label` so the whole label is the target; a group is a fieldset with a legend (`.gr-field-group`). The checked box keeps its strong border as the WCAG 1.4.11 boundary. In Angular, `indeterminate` is a model that sets the DOM property, and the directive lives in `@grass-ds/angular/checkbox` (anything importing `@angular/forms` goes in a secondary entry point).
-   - Parity (0.4): `pnpm parity` (catalog/parity) renders Reference and Angular stories in Chromium and requires identical pixels; it is the base of the drift check and not yet in CI.
+   - Parity (0.4): `pnpm parity` (catalog/parity) renders Reference and Angular stories in Chromium and requires identical pixels; it is the base of the drift check.
+   - Drift check (after 0.6): interaction states per story in `catalog/parity/states.mjs`, a coverage guard, parallel workers with one browser each, full-repaint screenshots and red diff images on failure; `Parity` becomes a required check.
    - Card (done in 0.5): the first composite. `.gr-card` goes on any element (the consumer picks article, section, div, li) with optional `__header`, `__title`, `__actions`, `__media`, `__body` and `__footer` parts styled by class (so the heading level is the consumer's); `data-variant` is outlined (default) or elevated; `data-query` makes it an opt-in query container. In Angular `<gr-card>` is an element in the root entry point (no forms) with attribute directives for the parts and no role or wrapper. Left out of 1.0: clickable or selectable cards, horizontal layout.
    - Dialog (done in 0.6): the second composite and the first with behaviour, all of it native (ADR 0005). `dialog.gr-dialog` opened with `showModal()` and named by `aria-labelledby` on `.gr-dialog__title` (the consumer picks the heading level), with optional `__header`, `__actions`, `__body` and `__footer` parts; `data-size` is sm, md (default) or lg; the body scrolls between a fixed header and footer; the footer can be a `<form method="dialog">` that returns a value; backdrop click is opt-in with `closedby="any"` (Chromium only for now, never the only way out); the page scroll lock is CSS (`html:has(.gr-dialog:modal)`); open and close are `@starting-style` plus `allow-discrete` transitions that collapse under reduced motion. In Angular `<gr-dialog>` wraps the native dialog (`open` model, `closed` output with the return value, `showModal()`/`close()`, part directives, `GR_DIALOG`) and adds no focus handling. Left out of 1.0: non-modal, drawers, nested dialogs, an alertdialog variant, a close icon.
 3. **1.0**: all five components stable in Angular.

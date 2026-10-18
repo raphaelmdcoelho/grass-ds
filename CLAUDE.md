@@ -36,7 +36,7 @@ Single package: `pnpm --filter @grass-ds/css run test`.
 - Units are `rem`.
 - Native-backed components are attributes on the native element (`<button grButton>`); only composites (Card, Dialog) are custom elements (`<gr-card>`) ([ADR 0004](docs/adr/0004-attribute-selectors-on-native-elements.md)).
 - Behaviour uses the web platform (`<dialog>`, Popover, anchor positioning), not Angular CDK ([ADR 0005](docs/adr/0005-web-platform-first-for-behaviour.md)). Implementations own behaviour, never appearance.
-- A new or changed component must keep the Reference, the style layer and every implementation on the same markup contract; add stories in both catalogs.
+- A new or changed component must keep the Reference, the style layer and every implementation on the same markup contract; add stories in both catalogs, and declare their interaction states in `catalog/parity/states.mjs` (the `Parity` check fails on a story with no entry).
 - Class prefix `.gr-`, CSS property prefix `--gr-`.
 - Commits: Conventional Commits, scopes `tokens|css|angular|catalog|repo|deps|release` (commitlint + husky + lint-staged enforce this and formatting).
 - Releases are automated by semantic-release on push to `main`; never hand-edit versions or tags. See README for npm token and failed-release recovery.

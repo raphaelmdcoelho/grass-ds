@@ -51,14 +51,16 @@ jobs:
       - run: pnpm test
       - run: pnpm build:catalog
 
-  # Not a required check yet: it is promoted with the drift-check milestone. It runs in parallel
-  # with `verify` and builds the catalog itself so it does not wait for it.
+  # The drift check. Meant to be a required check, so keep the job name `Parity` stable. It runs in
+  # parallel with `verify` and builds the catalog itself so it does not wait for it.
   parity:
     name: Parity
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       PARITY_OUT: ${{ github.workspace }}/parity-out
+      # One worker (and browser) per vCPU of the runner.
+      PARITY_CONCURRENCY: 4
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -82,6 +84,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: parity-mismatches
+          name: parity-mismatches # reference, angular and red-overlay diff PNGs
           path: parity-out
           if-no-files-found: ignore

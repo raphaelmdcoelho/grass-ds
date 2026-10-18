@@ -19,6 +19,7 @@ pnpm check:contrast   # WCAG AA check of semantic colour pairs
 pnpm test
 pnpm storybook        # Reference Catalog on http://localhost:6006
 pnpm build:catalog
+pnpm parity           # drift check: Reference vs Angular, needs build:catalog and a Chromium
 ```
 
 Commits follow Conventional Commits with scopes `tokens|css|angular|catalog|repo|deps|release`.
@@ -32,6 +33,7 @@ The committed Claude Code status line (`.claude/statusline.sh`) needs `jq` on th
 - **Themes** switch only through `data-theme="light|dark"` on `<html>` (absent means follow the OS). Scoped themes on a subtree are not supported: component tokens resolve their `var()` references at `:root`.
 - **Units** are `rem`, so the system follows the user's font size: 4px is `0.25rem` at the default size (`space.1`).
 - **Token format** is W3C DTCG with mixed value forms: colours in the structured object form (OKLCH), dimensions as strings. See [ADR 0002](docs/adr/0002-w3c-dtcg-json-as-token-source.md).
+- **Drift check**: every `Components/*` story must exist in both the Reference and the Angular Storybook with the same id, and declare its interaction states in [`catalog/parity/states.mjs`](catalog/parity/states.mjs) (`[]` for first paint only). The `Parity` job fails otherwise; see [its README](catalog/parity/README.md).
 - **`.gr-container`** is not a size container by default; add `data-query` when children use `@container` queries.
 
 ## Releasing
