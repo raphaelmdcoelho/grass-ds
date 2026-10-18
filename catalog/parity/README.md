@@ -35,6 +35,7 @@ or point `CHROMIUM_PATH` at an existing binary (for example `CHROMIUM_PATH=/usr/
 
 - It compares **first paint**, plus **Space** on the keyboard-focus stories. Hover, active, pointer and other keyboard interactions are not exercised.
 - Both Storybooks use the **same CSS**. A bug in the shared style layer (a collapsed mark, a wrong colour) renders the same on both sides and is invisible to this check by design: it only catches the Angular implementation drifting from the markup contract. Look at the renders too.
+- **A focused text field blinks its caret**, and in forced colours the caret colour cannot be hidden by the freeze stylesheet, so a story whose first paint has a text field focused can differ by one caret column from run to run. Keep initial focus on a button in such stories (the Dialog form story autofocuses Cancel).
 - Only Chromium; other engines may differ.
 - Only the stories that exist: a state with no story is not checked.
 

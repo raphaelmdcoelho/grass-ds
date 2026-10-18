@@ -1,10 +1,76 @@
 {
   "dialog": {
-    "background": { "$type": "color", "$value": "{color.surface.raised}" },
-    "foreground": { "$type": "color", "$value": "{color.text.default}" },
-    "backdrop": { "$type": "color", "$value": "{color.overlay.backdrop}" },
-    "radius": { "$type": "dimension", "$value": "{radius.surface}" },
-    "padding": { "$type": "dimension", "$value": "{layout.inset.loose}" },
-    "shadow": { "$type": "shadow", "$value": "{elevation.overlay}" }
+    "background": {
+      "$type": "color",
+      "$value": "{color.surface.raised}"
+    },
+    "foreground": {
+      "$type": "color",
+      "$value": "{color.text.default}"
+    },
+    "border": {
+      "$type": "color",
+      "$value": "{color.border.default}"
+    },
+    "divider": {
+      "$type": "color",
+      "$value": "{color.border.default}"
+    },
+    "backdrop": {
+      "$type": "color",
+      "$value": "{color.overlay.backdrop}"
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "{radius.surface}"
+    },
+    "padding": {
+      "$type": "dimension",
+      "$value": "{layout.inset.loose}"
+    },
+    "gap": {
+      "$type": "dimension",
+      "$value": "{layout.gap.tight}"
+    },
+    "width-sm": {
+      "$type": "dimension",
+      "$value": "{layout.measure.sm}"
+    },
+    "width-md": {
+      "$type": "dimension",
+      "$value": "{layout.measure.md}"
+    },
+    "width-lg": {
+      "$type": "dimension",
+      "$value": "{layout.measure.lg}"
+    },
+    "gutter": {
+      "$type": "dimension",
+      "$value": "{layout.gutter}"
+    },
+    "title-size": {
+      "$type": "dimension",
+      "$value": "{text.size.heading-3}"
+    },
+    "title-weight": {
+      "$type": "fontWeight",
+      "$value": "{text.weight.heading}"
+    },
+    "title-line-height": {
+      "$type": "number",
+      "$value": "{text.line-height.heading}"
+    },
+    "shadow": {
+      "$type": "shadow",
+      "$value": "{elevation.overlay}"
+    },
+    "transition-duration": {
+      "$type": "duration",
+      "$value": "{motion.duration.default}"
+    },
+    "transition-offset": {
+      "$type": "dimension",
+      "$value": "{layout.gap.default}"
+    }
   }
 }

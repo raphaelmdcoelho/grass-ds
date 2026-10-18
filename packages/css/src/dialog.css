@@ -1,0 +1,173 @@
+/*
+ * Dialog (modal only). Markup contract: a native <dialog class="gr-dialog"> opened with showModal() and
+ * closed with close(), a <form method="dialog"> or Escape. The browser provides the top layer, the
+ * backdrop, inertness of the page behind it, Escape, focus moving in and returning to the opener.
+ * The parts are optional and go in this order; the heading level of the title is the page's choice.
+ *
+ *   <dialog class="gr-dialog" aria-labelledby="remove-title" data-size="sm">
+ *     <div class="gr-dialog__header">
+ *       <h2 class="gr-dialog__title" id="remove-title">Remove member?</h2>
+ *       <div class="gr-dialog__actions">\3c !-- optional: controls on the right of the header --></div>
+ *     </div>
+ *     <div class="gr-dialog__body">...</div>
+ *     <form method="dialog" class="gr-dialog__footer">
+ *       <button class="gr-button" data-variant="secondary" value="cancel" autofocus>Cancel</button>
+ *       <button class="gr-button" data-variant="danger" value="remove">Remove</button>
+ *     </form>
+ *   </dialog>
+ *
+ * A form that wraps the body and the footer works too: as a direct child of the dialog it takes no box
+ * of its own. A dialog must always have an accessible name (aria-labelledby on the title, or aria-label).
+ * data-size="sm|md|lg" (md when absent) picks the width; it never exceeds the viewport minus the gutter.
+ * Backdrop click closes only when the dialog opts in with closedby="any" (where the browser supports it).
+ * The dialog has no padding of its own, its parts do: a click that lands on the dialog element itself is
+ * therefore a click on the backdrop. Not styled in 1.0: non-modal show(), drawers, nested dialogs.
+ */
+@layer grass.components {
+  .gr-dialog {
+    box-sizing: border-box;
+
+    /* The UA centres a modal dialog with inset: 0 and margin: auto; the reset layer zeroes the margin. */
+    margin: auto;
+    inline-size: min(var(--gr-dialog-width-md), 100% - 2 * var(--gr-dialog-gutter));
+    max-inline-size: none;
+    max-block-size: calc(100% - 2 * var(--gr-dialog-gutter));
+    padding: 0;
+    border: var(--gr-border-width) solid var(--gr-dialog-border);
+    border-radius: var(--gr-dialog-radius);
+    background-color: var(--gr-dialog-background);
+    color: var(--gr-dialog-foreground);
+
+    /* Compose, never replace: the focus ring's inner band is part of this shadow. */
+    box-shadow: var(--gr-focus-inner), var(--gr-dialog-shadow);
+
+    /* Closed: gone from layout (UA display: none). The transition keeps it rendered until it has faded out. */
+    opacity: 0;
+    translate: 0 var(--gr-dialog-transition-offset);
+    transition:
+      opacity var(--gr-dialog-transition-duration) var(--gr-motion-easing-default),
+      translate var(--gr-dialog-transition-duration) var(--gr-motion-easing-default),
+      overlay var(--gr-dialog-transition-duration) allow-discrete,
+      display var(--gr-dialog-transition-duration) allow-discrete;
+
+    &[data-size='sm'] {
+      inline-size: min(var(--gr-dialog-width-sm), 100% - 2 * var(--gr-dialog-gutter));
+    }
+
+    &[data-size='lg'] {
+      inline-size: min(var(--gr-dialog-width-lg), 100% - 2 * var(--gr-dialog-gutter));
+    }
+
+    /* A column, so a long body scrolls between a header and a footer that stay in view. */
+    &[open] {
+      display: flex;
+      flex-direction: column;
+      opacity: 1;
+      translate: 0 0;
+
+      @starting-style {
+        opacity: 0;
+        translate: 0 var(--gr-dialog-transition-offset);
+      }
+    }
+
+    &::backdrop {
+      background-color: var(--gr-dialog-backdrop);
+      opacity: 0;
+      transition:
+        opacity var(--gr-dialog-transition-duration) var(--gr-motion-easing-default),
+        overlay var(--gr-dialog-transition-duration) allow-discrete,
+        display var(--gr-dialog-transition-duration) allow-discrete;
+    }
+
+    &[open]::backdrop {
+      opacity: 1;
+
+      @starting-style {
+        opacity: 0;
+      }
+    }
+
+    /* A form around the body and the footer must not break the column. */
+    > form:not(.gr-dialog__footer) {
+      display: contents;
+    }
+
+    @media (forced-colors: active) {
+      /* The backdrop and the shadow vanish: the border carries the edge of the dialog. */
+      border-color: CanvasText;
+    }
+  }
+
+  /* The page behind a modal dialog does not scroll. The scrollbar disappearing shifts the page by its width. */
+  html:has(.gr-dialog:modal) {
+    overflow: hidden;
+  }
+
+  .gr-dialog__header {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gr-dialog-gap);
+    padding: var(--gr-dialog-padding);
+    border-block-end: var(--gr-border-width) solid var(--gr-dialog-divider);
+
+    @media (forced-colors: active) {
+      border-block-end-color: CanvasText;
+    }
+  }
+
+  /* Styled by class, not by tag, so the consumer picks the heading level that fits the page. */
+  .gr-dialog__title {
+    margin: 0;
+    font-family: var(--gr-text-family-heading);
+    font-size: var(--gr-dialog-title-size);
+    font-weight: var(--gr-dialog-title-weight);
+    line-height: var(--gr-dialog-title-line-height);
+  }
+
+  .gr-dialog__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gr-dialog-gap);
+    margin-inline-start: auto;
+  }
+
+  .gr-dialog__body {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    padding: var(--gr-dialog-padding);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    /* A scrolling body is focusable, and the default ring would be drawn over the header and footer dividers. */
+    &:focus-visible {
+      outline-offset: calc(-1 * var(--gr-border-focus-width));
+
+      --gr-focus-inner: inset 0 0 0 calc(2 * var(--gr-border-focus-width))
+        var(--gr-color-focus-ring-inner);
+
+      @media (forced-colors: active) {
+        --gr-focus-inner: 0 0 0 0 transparent;
+      }
+    }
+  }
+
+  .gr-dialog__footer {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--gr-dialog-gap);
+    margin: 0;
+    padding: var(--gr-dialog-padding);
+    border-block-start: var(--gr-border-width) solid var(--gr-dialog-divider);
+
+    @media (forced-colors: active) {
+      border-block-start-color: CanvasText;
+    }
+  }
+}

@@ -14,6 +14,7 @@ export const PARTS = [
   'text-field',
   'checkbox',
   'card',
+  'dialog',
   'utilities',
 ];
 

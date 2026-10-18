@@ -28,6 +28,18 @@
       "loose": {
         "$value": "{space.6}"
       }
+    },
+    "measure": {
+      "sm": {
+        "$value": "{size.measure-sm}"
+      },
+      "md": {
+        "$value": "{size.measure-md}"
+      },
+      "lg": {
+        "$value": "{size.measure-lg}"
+      },
+      "$description": "Content widths for surfaces that float over the page, such as a Dialog. Always capped to the viewport minus the gutters."
     }
   },
   "radius": {
