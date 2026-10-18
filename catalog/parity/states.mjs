@@ -17,14 +17,21 @@
  *   { press: key }       press and release a key (`Tab`, `Space`, `Enter`, `Escape`)
  *   { keyDown: key }     press a key and hold it
  *   { tabTo: sel }       press Tab until the element has focus, so :focus-visible matches
+ *   { type: [sel, text] } click the field, then type the text with the keyboard
  *   { expect: sel }      the selector matches at least one element
+ *   { expectFocus: sel } the element has focus (a dialog gives it back to its opener)
  *   { expectGone: sel }  the selector matches nothing (within two seconds)
  *
- * `sel` is a Playwright selector: CSS, optionally `>> nth=2` to pick one of several matches.
+ * `sel` is a Playwright selector: CSS, optionally `>> nth=2` to pick one of several matches. A
+ * selector that matches several elements without `>> nth=` is an error, never the first match.
+ * A state flagged with `tree(...)` also compares the accessibility tree (every story's first paint
+ * always does).
  * A selector that matches nothing on a side is reported as a failure of that side, not skipped.
  */
 
 const s = (name, ...steps) => ({ name, steps });
+/** Also compare the accessibility tree after this state (use where a state changes semantics). */
+const tree = (state) => ({ ...state, aria: true });
 const hover = (sel) => ({ hover: sel });
 const down = (sel) => ({ down: sel });
 const tabTo = (sel) => ({ tabTo: sel });
@@ -41,6 +48,20 @@ const pressStates = (sel, count, labels) =>
     ]);
 
 const FIELD = '.gr-text-field';
+const OPENER = 'button:has-text("Open dialog")';
+/**
+ * The dialog starts open (the story opens it from its play function). Close it, open it again from
+ * its trigger the way a user does, close it with Escape, and require the focus back on the trigger.
+ */
+const reopenAndClose = (opener, closeWith) => [
+  { press: 'Escape' },
+  { expectGone: 'dialog[open]' },
+  { click: opener },
+  { expect: 'dialog[open]' },
+  closeWith === 'cancel' ? { click: nth('.gr-dialog__footer .gr-button', 0) } : { press: 'Escape' },
+  { expectGone: 'dialog[open]' },
+  { expectFocus: opener },
+];
 const CHECKBOX = '.gr-checkbox';
 
 /** Dialog: Escape and the backdrop are exercised by the stories that make them meaningful. */
@@ -87,8 +108,19 @@ export const STATES = {
     s('keyboard focus', tabTo(FIELD)),
     s('pointer focus', { click: FIELD }),
     s('hover and focus', tabTo(FIELD), hover(FIELD)),
+    s('typed over the value', { type: [FIELD, ' Hopper'] }),
+    s(
+      'cleared and typed',
+      { click: FIELD },
+      { press: 'Control+a' },
+      { type: [FIELD, 'Grace Hopper'] },
+    ),
   ],
-  'components-textfield--with-hint': [s('hover', hover(FIELD)), s('keyboard focus', tabTo(FIELD))],
+  'components-textfield--with-hint': [
+    s('hover', hover(FIELD)),
+    s('keyboard focus', tabTo(FIELD)),
+    s('typed text after the value', { type: [FIELD, 'x'] }),
+  ],
   'components-textfield--invalid': [
     s('hover invalid', hover(FIELD)),
     s('invalid and keyboard focus', tabTo(FIELD)),
@@ -110,10 +142,37 @@ export const STATES = {
     s('keyboard focus number', tabTo('#type-number')),
     s('keyboard focus textarea', tabTo('#type-textarea')),
     s('hover textarea', hover('#type-textarea')),
+    s('typed in the textarea', { type: ['#type-textarea', 'Line one'] }),
   ],
   'components-textfield--dynamic-error': [
     s('focused', { click: '#dynamic' }),
-    s('error added on blur', { click: '#dynamic' }, { press: 'Tab' }, { expect: '#dynamic-error' }),
+    tree(
+      s(
+        'typed, no error on blur',
+        { type: ['#dynamic', 'Ada'] },
+        { press: 'Tab' },
+        { expectGone: '#dynamic-error' },
+      ),
+    ),
+    tree(
+      s(
+        'error removed once a name is typed',
+        { click: '#dynamic' },
+        { press: 'Tab' },
+        { expect: '#dynamic-error' },
+        { type: ['#dynamic', 'Ada'] },
+        { press: 'Tab' },
+        { expectGone: '#dynamic-error' },
+      ),
+    ),
+    tree(
+      s(
+        'error added on blur',
+        { click: '#dynamic' },
+        { press: 'Tab' },
+        { expect: '#dynamic-error' },
+      ),
+    ),
     s(
       'error added, field focused again',
       { click: '#dynamic' },
@@ -132,19 +191,19 @@ export const STATES = {
     s('hover label text', hover('.gr-checkbox-label span')),
     s('active', down(CHECKBOX)),
     s('keyboard focus', tabTo(CHECKBOX)),
-    s('toggled by click', { click: CHECKBOX }),
-    s('toggled by Space', tabTo(CHECKBOX), { press: 'Space' }),
+    tree(s('toggled by click', { click: CHECKBOX })),
+    tree(s('toggled by Space', tabTo(CHECKBOX), { press: 'Space' })),
   ],
   'components-checkbox--checked': [
     s('hover checked', hover(CHECKBOX)),
     s('active checked', down(CHECKBOX)),
-    s('unchecked by click', { click: CHECKBOX }),
+    tree(s('unchecked by click', { click: CHECKBOX })),
   ],
   'components-checkbox--indeterminate': [
     s('hover mixed', hover(CHECKBOX)),
     s('active mixed', down(CHECKBOX)),
     s('keyboard focus mixed', tabTo(CHECKBOX)),
-    s('mixed toggled', { click: CHECKBOX }),
+    tree(s('mixed toggled', { click: CHECKBOX })),
   ],
   'components-checkbox--disabled': [
     s('hover disabled', hover(nth(CHECKBOX, 0))),
@@ -155,7 +214,7 @@ export const STATES = {
   'components-checkbox--invalid': [
     s('hover invalid', hover(CHECKBOX)),
     s('invalid and keyboard focus', tabTo(CHECKBOX)),
-    s('invalid, checked by click', { click: CHECKBOX }),
+    tree(s('invalid, checked by click', { click: CHECKBOX })),
   ],
   'components-checkbox--with-hint': [
     s('hover', hover(CHECKBOX)),
@@ -165,10 +224,10 @@ export const STATES = {
     s('hover checked item', hover(nth(CHECKBOX, 0))),
     s('hover unchecked item', hover(nth(CHECKBOX, 1))),
     s('keyboard focus last', tabTo(nth(CHECKBOX, 2))),
-    s('clicked last', { click: nth(CHECKBOX, 2) }),
+    tree(s('clicked last', { click: nth(CHECKBOX, 2) })),
   ],
   'components-checkbox--keyboard-focus': [
-    s('toggled by Space', { press: 'Space' }),
+    tree(s('toggled by Space', { press: 'Space' })),
     s('hover focused', hover(nth(CHECKBOX, 0))),
     s('active by keyboard', { keyDown: 'Space' }),
     s('focus checked', tabTo(nth(CHECKBOX, 1))),
@@ -210,9 +269,12 @@ export const STATES = {
 
   'components-dialog--basic': [
     ...dialogButtons,
-    s('Escape closes', { press: 'Escape' }, { expectGone: 'dialog[open]' }),
-    s('backdrop click does not close', { clickAt: [4, 4] }, { expect: 'dialog[open]' }),
-    s('click inside does not close', { click: '.gr-dialog__title' }, { expect: 'dialog[open]' }),
+    s('focus returns to the opener after Escape', ...reopenAndClose(OPENER, 'escape')),
+    tree(s('Escape closes', { press: 'Escape' }, { expectGone: 'dialog[open]' })),
+    tree(s('backdrop click does not close', { clickAt: [4, 4] }, { expect: 'dialog[open]' })),
+    tree(
+      s('click inside does not close', { click: '.gr-dialog__title' }, { expect: 'dialog[open]' }),
+    ),
   ],
   'components-dialog--small': [
     s('hover last footer button', hover(nth('.gr-dialog__footer .gr-button', -1))),
@@ -226,15 +288,28 @@ export const STATES = {
     s('focus checkbox', tabTo(CHECKBOX)),
     s('hover checkbox', hover(CHECKBOX)),
     s('focus Invite', tabTo(nth('.gr-dialog__footer .gr-button', 1))),
-    s(
-      'Invite returns "invite"',
-      { click: nth('.gr-dialog__footer .gr-button', 1) },
-      { expectGone: 'dialog[open]' },
+    tree(
+      s(
+        'Invite returns "invite"',
+        { click: nth('.gr-dialog__footer .gr-button', 1) },
+        { expectGone: 'dialog[open]' },
+      ),
     ),
-    s(
-      'Cancel returns "cancel"',
-      { click: nth('.gr-dialog__footer .gr-button', 0) },
-      { expectGone: 'dialog[open]' },
+    tree(
+      s(
+        'Cancel returns "cancel"',
+        { click: nth('.gr-dialog__footer .gr-button', 0) },
+        { expectGone: 'dialog[open]' },
+      ),
+    ),
+    s('focus returns to the opener after Cancel', ...reopenAndClose(OPENER, 'cancel')),
+    tree(
+      s(
+        'typed email, then Invite',
+        { type: ['#form-email', 'ada@example.com'] },
+        { click: nth('.gr-dialog__footer .gr-button', 1) },
+        { expectGone: 'dialog[open]' },
+      ),
     ),
   ],
   'components-dialog--long-content': [
@@ -248,8 +323,19 @@ export const STATES = {
     s('keyboard focus Delete', tabTo(nth('.gr-dialog__footer .gr-button', 1))),
   ],
   'components-dialog--close-on-backdrop-click': [
-    s('backdrop click closes', { clickAt: [4, 4] }, { expectGone: 'dialog[open]' }),
-    s('click inside does not close', { click: '.gr-dialog__title' }, { expect: 'dialog[open]' }),
+    tree(s('backdrop click closes', { clickAt: [4, 4] }, { expectGone: 'dialog[open]' })),
+    tree(
+      s('click inside does not close', { click: '.gr-dialog__title' }, { expect: 'dialog[open]' }),
+    ),
     s('hover Close', hover('.gr-dialog__footer .gr-button')),
   ],
 };
+
+/** Stories also compared at a narrow width (a phone), first paint in light only. */
+export const NARROW = [
+  'components-dialog--basic',
+  'components-dialog--long-content',
+  'components-card--in-a-grid',
+  'components-textfield--default',
+  'components-textfield--types',
+];

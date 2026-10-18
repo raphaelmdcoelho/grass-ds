@@ -25,7 +25,7 @@ import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 import { PNG } from 'pngjs';
-import { STATES } from './states.mjs';
+import { NARROW, STATES } from './states.mjs';
 
 const ONLY = process.env.PARITY_ONLY; // substring filter on the story id
 const OUT = process.env.PARITY_OUT; // directory that receives the screenshots of every mismatch
@@ -95,11 +95,19 @@ const FREEZE = `*, *::before, *::after { transition: none !important; animation:
 /** Where a step went wrong on one side (a selector that matches nothing, a focus that never arrives). */
 class StepError extends Error {}
 
-/** The element a selector names, scrolled into view; a miss is a failure of that side. */
+/** A capture that never settled: five screenshots in a row, no two consecutive ones identical. */
+class UnstableError extends Error {}
+
+/**
+ * The element a selector names. A selector that matches nothing is a failure of that side, and so
+ * is one that matches several elements without an explicit `>> nth=`: a step never retargets.
+ */
 async function find(page, sel) {
-  const locator = page.locator(sel).first();
-  if ((await page.locator(sel).count()) === 0) throw new StepError(`selector not found: ${sel}`);
-  return locator;
+  const matches = await page.locator(sel).count();
+  if (matches === 0) throw new StepError(`selector not found: ${sel}`);
+  if (matches > 1 && !/>> nth=-?\d+$/.test(sel))
+    throw new StepError(`selector is ambiguous (${matches} matches, add >> nth=N): ${sel}`);
+  return page.locator(sel).first();
 }
 
 async function centre(page, sel) {
@@ -132,7 +140,23 @@ const STEPS = {
     await page.mouse.up();
   },
   press: (page, key) => page.keyboard.press(key),
-  keyDown: (page, key) => page.keyboard.down(key),
+  async keyDown(page, key) {
+    await page.keyboard.down(key);
+    (page.heldKeys ??= []).push(key);
+  },
+  async type(page, [sel, text]) {
+    await STEPS.click(page, sel);
+    await page.keyboard.type(text);
+  },
+  async expectFocus(page, sel) {
+    await settle(page);
+    const focused = await page
+      .locator(sel)
+      .first()
+      .evaluate((el) => el === el.ownerDocument.activeElement)
+      .catch(() => false);
+    if (!focused) throw new StepError(`expected focus on: ${sel}`);
+  },
   async tabTo(page, sel) {
     const target = await find(page, sel);
     for (let i = 0; i < 30; i++) {
@@ -162,8 +186,10 @@ const settle = (page) =>
 /**
  * After a state change (hover or active on an element that is already focused, say) Chromium
  * repaints only the invalidated region, and anti-aliased edges such as the ends of a focus ring can
- * come out one level different from a full paint, from run to run. Changing the root background
- * and putting it back invalidates the whole page, so every screenshot is of a full paint.
+ * come out one level different from a full paint, from run to run. A tiny change of the root zoom,
+ * put back, lays out and repaints everything (the top layer included, which a background change does
+ * not reach and an opacity change on every element makes noisier), so every screenshot is of a full
+ * paint.
  */
 const repaint = async (page) => {
   const flip = (on) =>
@@ -172,7 +198,7 @@ const repaint = async (page) => {
       if (!on) return;
       const style = document.createElement('style');
       style.id = 'parity-repaint';
-      style.textContent = '*, *::before, *::after, ::backdrop { opacity: 0.99 !important; }';
+      style.textContent = 'html { zoom: 1.0001 !important; }';
       document.head.append(style);
     }, on);
   await flip(true);
@@ -184,21 +210,23 @@ const repaint = async (page) => {
 /**
  * Even after a full repaint, Chromium's software rasteriser very occasionally (a few captures in a
  * hundred) anti-aliases a rounded corner one level differently. A capture is therefore repeated,
- * with a full repaint in between, until two consecutive screenshots are identical (at most five).
+ * with a full repaint in between, until two consecutive screenshots are identical. If five in a row
+ * never agree the capture is unstable and fails; the last shot is never used silently.
  * A real drift is the same every time and is unaffected; noise does not repeat itself.
  */
+const MAX_SHOTS = 5;
 async function stableScreenshot(page) {
   const shoot = async () => {
     await repaint(page);
-    return page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' });
+    return page.screenshot({ fullPage: true });
   };
   let previous = await shoot();
-  for (let attempt = 1; attempt < 5; attempt++) {
+  for (let shots = 2; shots <= MAX_SHOTS; shots++) {
     const next = await shoot();
-    if (Buffer.compare(previous, next) === 0) return next;
+    if (Buffer.compare(previous, next) === 0) return { png: next, shots };
     previous = next;
   }
-  return previous;
+  throw new UnstableError(`unstable capture: ${MAX_SHOTS} screenshots in a row never agreed`);
 }
 
 /**
@@ -226,14 +254,60 @@ const FOCUSED_TEXT_BOX = () => {
 };
 
 /**
- * Gets the story on screen in its initial state. The first state of a page loads it; later states
- * remount it through Storybook (a reload costs most of the run), after the previous state's pointer,
- * held keys and scroll are cleared.
+ * Playwright's aria snapshot lists roles, names and a few states, but not the accessible
+ * description (`aria-describedby`) or `aria-invalid`. This adds, for every node under the story root
+ * that has one, its role, name, description and those properties, from Chrome's accessibility tree.
+ */
+const AX_PROPERTIES = new Set(['invalid', 'checked', 'disabled', 'readonly', 'required', 'modal']);
+async function accessibilityDetails(page) {
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const { root } = await cdp.send('DOM.getDocument', { depth: 0 });
+    const { nodeId } = await cdp.send('DOM.querySelector', {
+      nodeId: root.nodeId,
+      selector: '#storybook-root',
+    });
+    const { node } = await cdp.send('DOM.describeNode', { nodeId });
+    const { nodes } = await cdp.send('Accessibility.getFullAXTree');
+    const byId = new Map(nodes.map((n) => [n.nodeId, n]));
+    const lines = [];
+    const visit = (n) => {
+      if (!n) return;
+      const properties = (n.properties ?? [])
+        .filter((p) => AX_PROPERTIES.has(p.name))
+        .map((p) => `${p.name}=${p.value.value}`);
+      const description = n.description?.value;
+      if (!n.ignored && (properties.length || description)) {
+        const label = `${n.role?.value} "${n.name?.value ?? ''}"`;
+        lines.push(
+          `${label}${description ? ` description="${description}"` : ''}${properties.length ? ` ${properties.join(' ')}` : ''}`,
+        );
+      }
+      for (const id of n.childIds ?? []) visit(byId.get(id));
+    };
+    visit(nodes.find((n) => n.backendDOMNodeId === node.backendNodeId));
+    return lines.join('\n');
+  } finally {
+    await cdp.detach();
+  }
+}
+
+/**
+ * Gets the story on screen in its initial state. The first state of a page loads it. A later state
+ * remounts it through Storybook (a reload costs most of the run) after releasing the pointer and
+ * every held key, moving the pointer outside the page and scrolling to the top.
+ *
+ * What a page cannot reset is the browser's input modality (after a key or a mouse press, whether a
+ * script's `focus()` shows `:focus-visible`). It only matters to a story that moves focus from a
+ * script (a dialog's autofocus, a play function pressing Tab), so after a state that pressed a key
+ * or a mouse button such a story is reloaded instead (`reload`, decided by the caller).
  */
 async function load(page, base, id, theme, reload) {
   if (reload) {
     await page.goto(`${base}/iframe.html?id=${id}&viewMode=story&globals=theme:${theme}`);
   } else {
+    for (const key of page.heldKeys ?? []) await page.keyboard.up(key);
+    page.heldKeys = [];
     await page.mouse.up();
     await page.mouse.move(-10, -10);
     await page.evaluate((storyId) => {
@@ -248,7 +322,11 @@ async function load(page, base, id, theme, reload) {
   if (failed) throw new Error(`${id}: ${failed}`);
 }
 
-async function capture(page, base, id, { theme, forced }, state, reload) {
+const INPUT_STEPS = new Set(['down', 'click', 'clickAt', 'press', 'keyDown', 'tabTo', 'type']);
+const usedInput = (state) =>
+  (state?.steps ?? []).some((step) => INPUT_STEPS.has(Object.keys(step)[0]));
+
+async function capture(page, base, id, { theme, forced, aria }, state, reload) {
   await load(page, base, id, theme, reload);
   if (reload) await page.addStyleTag({ content: FREEZE });
   await page.evaluate(() => document.fonts.ready);
@@ -257,7 +335,17 @@ async function capture(page, base, id, { theme, forced }, state, reload) {
     await STEPS[name](page, arg);
   }
   const mask = forced ? await page.evaluate(FOCUSED_TEXT_BOX) : null;
-  return { png: await stableScreenshot(page), mask };
+  const { png, shots } = await stableScreenshot(page);
+  // The accessibility tree is the same in every colour mode: taken once, in the light run. It is
+  // read after the repaints, so work an implementation finishes asynchronously (Angular renders a
+  // `closed` output a tick later) has landed, as it has in the screenshot.
+  const tree =
+    aria && (state === null || state.aria)
+      ? `${await page.locator('#storybook-root').ariaSnapshot()}\n\nname, description and properties:\n${await accessibilityDetails(page)}`
+      : undefined;
+  const scriptedFocus =
+    state === null && (await page.evaluate(() => document.activeElement !== document.body));
+  return { png, mask, shots, tree, scriptedFocus };
 }
 
 const decode = ({ png, mask }) => {
@@ -363,50 +451,148 @@ const MODES = [
   { theme: 'light', forced: true },
   { theme: 'dark', forced: true },
 ];
-const jobs = selected.flatMap((id) => MODES.map((mode) => ({ id, ...mode })));
+const NARROW_WIDTH = 360;
+const BLANK_MAX_BYTES = 20_000;
+const jobs = [
+  ...selected.flatMap((id) => MODES.map((mode) => ({ id, ...mode, width: 700 }))),
+  ...NARROW.filter((id) => selected.includes(id)).map((id) => ({
+    id,
+    theme: 'light',
+    forced: false,
+    width: NARROW_WIDTH,
+    narrow: true,
+  })),
+];
 const results = jobs.map(() => null);
 const SIDES = { reference: '', angular: '/angular' };
 
-/** All the states of one story in one theme and colour mode, on both sides. */
-async function run(browser, { id, theme, forced }) {
-  const modeName = `${theme}${forced ? '-forced' : ''}`;
-  const states = [null, ...(STATE_MODES.includes(modeName) ? (STATES[id] ?? []) : [])];
-  const shots = {};
-  for (const [side, base] of Object.entries(SIDES)) {
+const firstLine = (error) => String(error?.message ?? error).split('\n')[0];
+
+/**
+ * Every state of one story on one side, in a fresh browser context. A step or stability failure is
+ * recorded for its state. Anything else (a render timeout, a closed page, a crashed browser) is an
+ * infrastructure error: the story is retried once from scratch on that side, and if it fails again
+ * the state it died in is reported, never a raw stack.
+ */
+async function captureSide(browser, base, id, job, states) {
+  const attempt = async (out) => {
     const context = await browser.newContext({
-      viewport: { width: 700, height: 1000 },
+      viewport: { width: job.width, height: 1000 },
       deviceScaleFactor: 1,
       reducedMotion: 'reduce',
-      forcedColors: forced ? 'active' : 'none',
-      colorScheme: theme,
+      forcedColors: job.forced ? 'active' : 'none',
+      colorScheme: job.theme,
     });
-    await context.addInitScript(WATCH_RENDER);
-    await context.addInitScript(FREEZE_AT_START, FREEZE);
-    shots[side] = [];
-    const page = await context.newPage();
-    for (const [n, state] of states.entries()) {
-      try {
-        const shot = await capture(page, `${origin}${base}`, id, { theme, forced }, state, n === 0);
-        shots[side].push(shot);
-      } catch (error) {
-        if (!(error instanceof StepError)) throw error;
-        shots[side].push({ error: error.message });
+    try {
+      await context.addInitScript(WATCH_RENDER);
+      await context.addInitScript(FREEZE_AT_START, FREEZE);
+      const page = await context.newPage();
+      let reload = true;
+      let scriptedFocus = true;
+      for (const state of states) {
+        const label = state?.name ?? 'first paint';
+        try {
+          const shot = await capture(page, `${origin}${base}`, id, job, state, reload);
+          out.push(shot);
+          if (state === null) scriptedFocus = shot.scriptedFocus;
+          reload = scriptedFocus && usedInput(state);
+        } catch (error) {
+          if (error instanceof StepError || error instanceof UnstableError) {
+            out.push({ error: error.message });
+            reload = true;
+          } else throw Object.assign(error, { label });
+        }
       }
+    } finally {
+      await context.close().catch(() => {});
     }
-    await context.close();
+    return out;
+  };
+  try {
+    return await attempt([]);
+  } catch {
+    const out = [];
+    try {
+      return await attempt(out);
+    } catch (error) {
+      const failed = states.slice(out.length);
+      return [
+        ...out,
+        ...failed.map((state, i) => ({
+          error:
+            i === 0
+              ? `infrastructure error, retried once: ${firstLine(error)}`
+              : 'not run: the story aborted on an infrastructure error',
+        })),
+      ];
+    }
   }
+}
+
+/** Lines only in `a` as `- `, only in `b` as `+ `, by longest common subsequence. */
+function textDiff(a, b) {
+  const x = a.split('\n');
+  const y = b.split('\n');
+  const lcs = Array.from({ length: x.length + 1 }, () => new Array(y.length + 1).fill(0));
+  for (let i = x.length - 1; i >= 0; i--)
+    for (let j = y.length - 1; j >= 0; j--)
+      lcs[i][j] = x[i] === y[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+  const out = [];
+  let i = 0;
+  let j = 0;
+  while (i < x.length || j < y.length) {
+    if (i < x.length && j < y.length && x[i] === y[j]) {
+      out.push(`  ${x[i]}`);
+      i++;
+      j++;
+    } else if (j >= y.length || (i < x.length && lcs[i + 1][j] >= lcs[i][j + 1]))
+      out.push(`- ${x[i++]}`);
+    else out.push(`+ ${y[j++]}`);
+  }
+  return out.join('\n');
+}
+
+/** All the states of one story in one theme and colour mode (or one narrow first paint), both sides. */
+async function run(browser, job) {
+  const { id, theme, forced } = job;
+  const modeName = `${theme}${forced ? '-forced' : ''}`;
+  const states = [
+    null,
+    ...(!job.narrow && STATE_MODES.includes(modeName) ? (STATES[id] ?? []) : []),
+  ];
+  const aria = !job.narrow && modeName === 'light';
+  const shots = {};
+  for (const [side, base] of Object.entries(SIDES))
+    shots[side] = await captureSide(browser, base, id, { ...job, aria }, states);
   const outcome = [];
   states.forEach((state, i) => {
     const label = state?.name ?? 'first paint';
     const [a, b] = [shots.reference[i], shots.angular[i]];
+    const slow = Object.entries({ reference: a, angular: b })
+      .filter(([, shot]) => shot.shots > 2)
+      .map(([side, shot]) => ({ side, shots: shot.shots }));
     const errors = Object.entries({ reference: a, angular: b })
       .filter(([, shot]) => shot.error)
       .map(([side, shot]) => `${side}: ${shot.error}`);
-    if (errors.length) return outcome.push({ label, problem: errors.join('; ') });
-    const [x, y] = [decode(a), decode(b)];
-    if (isBlank(x) || isBlank(y)) return outcome.push({ label, problem: 'blank screenshot', a, b });
-    if (same(x, y)) return outcome.push({ label });
-    outcome.push({ label, problem: 'pixels differ', a, b, diff: diffImage(x, y) });
+    if (errors.length) return outcome.push({ label, slow, problem: errors.join('; ') });
+    const entry = { label, slow, trees: a.tree === undefined ? 0 : 1 };
+    // Decoding a PNG is the heaviest thing the main thread does and every worker waits for it, so
+    // byte-identical screenshots (the usual case) are not decoded; only a small one, which could be
+    // a blank page, is checked for blankness.
+    const identicalBytes = !a.mask && !b.mask && a.png.equals(b.png);
+    const [x, y] = identicalBytes
+      ? [a.png.length < BLANK_MAX_BYTES ? decode(a) : null, null]
+      : [decode(a), decode(b)];
+    if ((x && isBlank(x)) || (y && isBlank(y)))
+      return outcome.push({ ...entry, problem: 'blank screenshot', a, b });
+    if (!identicalBytes && !same(x, y))
+      outcome.push({ ...entry, problem: 'pixels differ', a, b, diff: diffImage(x, y) });
+    else if (a.tree !== b.tree)
+      outcome.push({
+        ...entry,
+        problem: `accessibility tree differs (- Reference, + Angular):\n${textDiff(a.tree, b.tree)}`,
+      });
+    else outcome.push(entry);
   });
   return outcome;
 }
@@ -423,18 +609,25 @@ server.close();
 
 // Report in a fixed order, whatever order the workers finished in.
 let compared = 0;
+let trees = 0;
 const table = new Map();
 const writes = [];
+const slowCaptures = [];
 jobs.forEach((job, i) => {
-  const row = table.get(job.id) ?? { pairs: 0, states: new Set(), bad: 0 };
-  table.set(job.id, row);
+  const key = job.narrow ? `${job.id} @${job.width}px` : job.id;
+  const row = table.get(key) ?? { pairs: 0, states: new Set(), bad: 0 };
+  table.set(key, row);
   for (const o of results[i]) {
     row.states.add(o.label);
     row.pairs++;
     compared++;
+    trees += o.trees ?? 0;
+    const mode = `${job.theme}${job.forced ? '-forced' : ''}${job.narrow ? `-${job.width}px` : ''}`;
+    for (const { side, shots } of o.slow ?? [])
+      slowCaptures.push(`${job.id} | ${o.label} | ${mode} | ${side} | ${shots} shots`);
     if (!o.problem) continue;
     row.bad++;
-    const name = `${job.id}--${o.label}--${job.theme}${job.forced ? '-forced' : ''}`;
+    const name = `${job.id}--${o.label}--${mode}`;
     failures.push(`${name}: ${o.problem}`);
     if (OUT && o.a)
       writes.push(
@@ -460,22 +653,29 @@ const header = ['story', 'states', 'pairs', 'result'];
 const widths = header.map((h, c) => Math.max(h.length, ...rows.map((r) => r[c].length)));
 const line = (cells) => cells.map((cell, c) => cell.padEnd(widths[c])).join('  ');
 console.log([line(header), ...rows.map(line)].join('\n'));
+const slowReport = slowCaptures.length
+  ? `${slowCaptures.length} capture(s) needed more than 2 screenshots to settle (story | state | mode | side | shots):\n  ${slowCaptures.join('\n  ')}`
+  : 'No capture needed more than 2 screenshots to settle.';
+console.log(`\n${slowReport}`);
+const seconds = ((Date.now() - started) / 1000).toFixed(0);
+const summary = `${compared} screenshot pairs compared (first paints, interaction states and narrow first paints), ${trees} accessibility-tree comparisons, ${CONCURRENCY} workers, ${seconds}s.`;
 if (process.env.GITHUB_STEP_SUMMARY)
   await appendFile(
     process.env.GITHUB_STEP_SUMMARY,
-    `### Parity\n\n| ${header.join(' | ')} |\n| --- | ---: | ---: | --- |\n${rows.map((r) => `| ${r.join(' | ')} |`).join('\n')}\n\n`,
+    [
+      `### Parity\n\n${failures.length ? `**${failures.length} failure(s)**\n\n\`\`\`\n${failures.join('\n')}\n\`\`\`\n\n` : ''}${summary}\n`,
+      `| ${header.join(' | ')} |\n| --- | ---: | ---: | --- |\n${rows.map((r) => `| ${r.join(' | ')} |`).join('\n')}\n`,
+      `\n#### Capture stability\n\n${slowCaptures.length ? `\`\`\`\n${slowCaptures.join('\n')}\n\`\`\`` : 'Every capture settled in two screenshots.'}\n\n`,
+    ].join('\n'),
   );
 
 if (compared === 0) {
   console.error(`No screenshot pair was compared (PARITY_ONLY=${ONLY ?? ''} matched no story).`);
   process.exit(1);
 }
-const seconds = ((Date.now() - started) / 1000).toFixed(0);
-console.log(
-  `\n${compared} screenshot pairs compared: ${selected.length} stories: ${selected.length * 4} first paints (2 themes x 2 colour modes) and ${compared - selected.length * 4} interaction states (in ${STATE_MODES.join(', ')}) (${CONCURRENCY} workers, ${seconds}s).`,
-);
+console.log(`\n${summary}`);
 if (failures.length) {
   console.error(`DRIFT in ${failures.length}:\n  ${failures.join('\n  ')}`);
   process.exit(1);
 }
-console.log('Reference and Angular are pixel-identical.');
+console.log('Reference and Angular are identical in pixels and in the accessibility tree.');
