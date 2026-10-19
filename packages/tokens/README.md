@@ -20,7 +20,7 @@ Load the stylesheet once, before `@grass-ds/css` (it declares the `grass.tokens`
 @import '@grass-ds/css/grass.css';
 ```
 
-Or link `node_modules/@grass-ds/tokens/dist/tokens.css` from your bundler or `angular.json`.
+In `angular.json` use the specifier too: `"styles": ["@grass-ds/tokens/tokens.css", ...]`. Without a bundler, link `node_modules/@grass-ds/tokens/dist/tokens.css` (the file behind that export).
 
 ## Theming
 

@@ -11,11 +11,7 @@ npm install @grass-ds/angular @grass-ds/css @grass-ds/tokens
 `@grass-ds/css` and `@angular/core` are peer dependencies. `@angular/forms` is an optional one, needed only by the entry points that touch forms (`@grass-ds/angular/text-field`, `@grass-ds/angular/checkbox`); an app created without it needs `npm install @angular/forms` before using them. Load the stylesheets once, for example in `angular.json` `styles`:
 
 ```json
-[
-  "node_modules/@grass-ds/tokens/dist/tokens.css",
-  "node_modules/@grass-ds/css/dist/fonts.css",
-  "node_modules/@grass-ds/css/dist/grass.css"
-]
+["@grass-ds/tokens/tokens.css", "@grass-ds/css/fonts.css", "@grass-ds/css/grass.css"]
 ```
 
 `fonts.css` is optional. All packages share one version, so upgrade them together. `@grass-ds/css` and `@grass-ds/tokens` must be the same version as this package.
