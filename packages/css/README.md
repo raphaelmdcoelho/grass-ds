@@ -110,11 +110,11 @@ A group of related checkboxes is a **field group**: a `fieldset` with a `legend`
 - **Layout**: the card is a flex column, so it works in `.gr-stack` and `.gr-grid`; the body takes the spare height, so footers line up across a grid row. The media is full width and rounded only at the card's corners (the card does not clip its content, so focus rings of controls inside are never cut off).
 - **Query container**: add `data-query` to make the card a container for `@container` queries. It is opt-in because `container-type` makes the element a containing block for `position: fixed` descendants and a stacking context.
 - **Accessibility**: put a heading in the header and pick its level for the page. A card has no role: add `role` (or use `article`/`section`) **only together with an accessible name** (`aria-labelledby` the title), because an unnamed region is noise for screen readers. Do not make the whole card a link or button, and do not nest interactive cards: put the actions in the header or footer. Text on the card is contrast-checked against `surface.raised` in both themes.
-- **Left out of 1.0 on purpose**: a clickable or selectable whole card (it needs a stretched-link or radio/checkbox pattern with its own focus and nesting rules), a horizontal layout (a media-beside-body variant: it needs container-driven rules and a second contract), and a muted subtitle part. They can be added without breaking this contract.
+- **Not included, on purpose**: a clickable or selectable whole card (it needs a stretched-link or radio/checkbox pattern with its own focus and nesting rules), a horizontal layout (a media-beside-body variant: it needs container-driven rules and a second contract), and a muted subtitle part. They can be added without breaking this contract.
 
 ## Dialog
 
-`dialog.gr-dialog` is a native `<dialog>` that you open with `showModal()`. It is **modal only** in 1.0. The browser provides the top layer, the backdrop, making the page behind it inert, Escape, and moving focus in and back to the control that opened it, so this layer adds no script. Its parts are optional, in this order; the footer can be a `<form method="dialog">` to return a value.
+`dialog.gr-dialog` is a native `<dialog>` that you open with `showModal()`. It is **modal only**. The browser provides the top layer, the backdrop, making the page behind it inert, Escape, and moving focus in and back to the control that opened it, so this layer adds no script. Its parts are optional, in this order; the footer can be a `<form method="dialog">` to return a value.
 
 ```html
 <button class="gr-button" id="open">Delete project</button>
@@ -153,11 +153,11 @@ A group of related checkboxes is a **field group**: a `fieldset` with a `legend`
 - **Destructive confirmation**: say what will happen in the title (a question) and name the action on the button ("Delete project", not "OK" or "Yes"); use `data-variant="danger"` for it and keep Cancel next to it.
 - **Enter in a form**: Enter in a field submits the form with its first submit button. Order the buttons accordingly and `autofocus` the least destructive one.
 - **Layers**: the scroll lock is in the `grass.components` layer, so an unlayered `html { overflow: ... }` rule of your own overrides it.
-- **Tested in**: Chromium; Firefox, Safari and screen readers are not yet verified by me.
+- **Tested in**: Chromium in CI. Manual results for Firefox, Safari and screen readers are in the [support table](https://github.com/raphaelmdcoelho/grass-ds#versioning-and-support).
 - **Scroll lock**: while a modal dialog is open the page does not scroll (`overflow: hidden` on `html`). The page's own scrollbar disappearing shifts it sideways by the scrollbar width on platforms with classic scrollbars; add `scrollbar-gutter: stable` to `html` if that matters to you.
 - **Motion**: the dialog fades and slides in and out with `@starting-style` and `transition-behavior: allow-discrete` (`display` and the top-layer `overlay` transition too, so the exit is visible). Durations are tokens and collapse to 0 under `prefers-reduced-motion`.
 - **Forced colours**: the backdrop and the shadow vanish, so the border (and the header and footer dividers) is drawn in `CanvasText`.
-- **Left out of 1.0 on purpose**: non-modal dialogs (`show()`, which needs positioning and focus rules of its own), drawers and side sheets, nested dialogs (a second `showModal()` works natively but has no designed stacking), `role="alertdialog"` (add it yourself on a confirmation if you want it announced as an alert; the styles do not change), and a close icon button (the library has no icons yet: use a text button in `.gr-dialog__actions` or the footer).
+- **Not included, on purpose**: non-modal dialogs (`show()`, which needs positioning and focus rules of its own), drawers and side sheets, nested dialogs (a second `showModal()` works natively but has no designed stacking), `role="alertdialog"` (add it yourself on a confirmation if you want it announced as an alert; the styles do not change), and a close icon button (the library has no icons yet: use a text button in `.gr-dialog__actions` or the footer).
 
 ## Theming
 
@@ -166,5 +166,19 @@ The OS preference applies by default; force a theme with `data-theme="light"` or
 ## Focus ring
 
 The focus ring is an outline plus an inner band drawn with `box-shadow`. Custom components built on this layer must write `box-shadow: var(--gr-focus-inner), <own shadow>` so the band is kept.
+
+## Public API
+
+Semver covers the `.gr-*` classes and their parts, the `data-*` and ARIA state hooks, the six `grass.*` layer names and their order, the documented custom properties (`--gr-focus-inner`, `--gr-stack-gap`, `--gr-cluster-gap`, `--gr-grid-gap`, `--gr-grid-min`, `--gr-container-gutter`) and the files in `exports` (`grass.css`, `fonts.css`, `fonts/*`). The whole list is in [docs/public-api.md](https://github.com/raphaelmdcoelho/grass-ds/blob/main/docs/public-api.md), and the rules in [Versioning and support](https://github.com/raphaelmdcoelho/grass-ds#versioning-and-support).
+
+### Layout and text helpers
+
+All of them are in the `grass.layout` or `grass.base` layer. Variants are data attributes.
+
+- `.gr-container`: a centred column no wider than `--gr-layout-container`, with `--gr-container-gutter` at the sides; add `data-query` to make it a size container for `@container` queries.
+- `.gr-stack`: vertical flow; `data-gap="tight"` or `"loose"` (`--gr-stack-gap`).
+- `.gr-cluster`: a wrapping row; `data-gap`, `data-justify="end"` or `"between"`, `data-align="start"` (`--gr-cluster-gap`).
+- `.gr-grid`: auto-fit columns of at least `--gr-grid-min` (default `16rem`); `data-gap`.
+- `.gr-display`, `.gr-lead`, `.gr-text-small`, `.gr-text-muted`: text styles. `.gr-visually-hidden`: hidden visually, still announced.
 
 All `@grass-ds/*` packages share one version, so upgrade them together.
