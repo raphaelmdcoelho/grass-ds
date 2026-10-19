@@ -1,0 +1,30 @@
+version: 2
+updates:
+  # The workflows pin every action by commit SHA; Dependabot bumps the SHA and the version comment.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci(repo)
+
+  # Workspace dependencies, one PR a month. Dependabot does not read pnpm's minimumReleaseAge, so the
+  # cooldown does the same job. lockfile-only keeps it away from the version ranges in package.json
+  # (peer ranges are a published contract, widening them is a deliberate change).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    versioning-strategy: lockfile-only
+    groups:
+      dependencies:
+        patterns: ['*']
+    commit-message:
+      prefix: chore(deps)
