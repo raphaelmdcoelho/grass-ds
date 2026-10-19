@@ -26,7 +26,7 @@ Load the stylesheets in this order: tokens, then the optional fonts, then the st
 @import '@grass-ds/css/grass.css';
 ```
 
-Without a bundler, serve the files and link them:
+Without a bundler, serve the files and link them (these `dist/` paths are the files behind the package `exports`, so they are public API):
 
 ```html
 <link rel="stylesheet" href="/node_modules/@grass-ds/tokens/dist/tokens.css" />
@@ -46,7 +46,7 @@ The markup of every component (TextField, Checkbox, Card, Dialog...) is in the [
 
 ## Quick start: Angular
 
-Angular 22 or later of the 22 line (`^22.0.0`). In a new app (`npx @angular/cli@22 new my-app`, accept the defaults):
+Angular 22 (`^22.0.0`). In a new app (`npx @angular/cli@22 new my-app`, accept the defaults):
 
 ```sh
 cd my-app
@@ -104,23 +104,33 @@ The three packages are released together under one [semver](https://semver.org/)
 | Removing or renaming a public token, class, `data-*`/ARIA hook, `@layer` name, selector, input, output, model, method, exported symbol or entry point | no              | no                               | yes             |
 | Changing a markup contract (an element, class or attribute a component renders, or the order of its parts)                                            | no              | no                               | yes             |
 | Changing the meaning of a semantic token (a token stays the same role) or removing a theme                                                            | no              | no                               | yes             |
-| Making a token's contrast fall below WCAG 2.2 AA                                                                                                      | no              | no                               | no              |
+| Making a pair in `contrast.json` (the semantic text, control and focus pairs) fall below WCAG 2.2 AA                                                  | no              | no                               | no              |
 | Dropping a supported Angular major or browser                                                                                                         | no              | no                               | yes             |
 
-- **Tokens** (`@grass-ds/tokens`): the semantic and component custom properties are public; primitive tokens (`--gr-palette-*`, `--gr-space-*`...) are not and may change in a minor release. A token keeps its name and role; its value may be tuned in a minor.
+- **Tokens** (`@grass-ds/tokens`): the semantic and component custom properties are public; primitive tokens (`--gr-palette-*`, `--gr-space-*`...) are not and may change in a minor release. A token keeps its name and role; its value may be tuned in a minor. The 22 tokens no component uses yet (most `--gr-color-feedback-*`, `--gr-motion-duration-slow`, `--gr-motion-easing-enter`/`-exit`) are provisional until one does.
 - **CSS** (`@grass-ds/css`): public are the `.gr-*` classes, their parts and `data-*`/ARIA state hooks, the six `grass.*` layer names and order, the files in `exports` and the documented hooks. Selectors outside `.gr-*` and internal custom properties are not.
 - **Angular** (`@grass-ds/angular`): public are the exports of the three entry points (`.`, `./text-field`, `./checkbox`), their selectors, inputs, outputs, models and methods. Members marked `private`/`protected` in the typings and the generated `ɵ` fields are not.
 - **Visual changes** are not breaking as long as they keep the markup contract and the contrast guarantee: a green that shifts a few points, a radius from 8px to 10px. A _redesign_ (a different palette, a different component shape) is a major. A fix that changes the output because the old output was wrong (focus not visible, a missing label, a failed contrast pair) is a patch or a minor, never held for a major.
 - **Deprecation**: a feature is deprecated in a minor release (`@deprecated` in the typings, a note in the README and the release notes, and a comment in the CSS) and removed no earlier than the next major. It keeps working until then.
-- **Shared version**: every release bumps all three packages to the same number, even one with no change of its own, and `@grass-ds/angular` and `@grass-ds/css` require the exact same version of their peers. Upgrade all three together.
+- **Shared version**: every release bumps all three packages to the same number, even one with no change of its own. The peer dependencies between them are caret ranges (`@grass-ds/css` 1.2.0 requires `@grass-ds/tokens ^1.2.0`, `@grass-ds/angular` 1.2.0 requires `@grass-ds/css ^1.2.0`), so a package may be one release behind a sibling (updating `@grass-ds/tokens` alone is fine), but never ahead of the packages it depends on. Update all three together (tokens first if you do it one by one).
 
 ### Supported Angular versions
 
-`@grass-ds/angular` has peer ranges `@angular/core ^22.0.0` (and an optional `@angular/forms ^22.0.0`). A new Angular major is added to the range in a **minor** release after the components pass their tests on it; no date is promised. Dropping an Angular major from the range is a **major** release. The components use standalone components, signal inputs, `OnPush` and work without zone.js.
+`@grass-ds/angular` has peer ranges `@angular/core ^22.0.0` (and an optional `@angular/forms ^22.0.0`). A new Angular major is added to the range in a **minor** release after the components pass their tests on it; no date is promised. Dropping an Angular major from the range is a **major** release. The components use standalone components, signal inputs, `OnPush` and work without zone.js. **What is tested:** CI builds and tests against Angular 22.2.x. The `^22.0.0` floor was checked once, by hand, for 1.0 (a new app pinned to Angular 22.0.0 builds every example of the Angular README and opens and closes a Dialog), but it is not in CI.
 
 ### Supported browsers
 
-The current versions of Chrome, Edge, Firefox and Safari (desktop and mobile). The style layer uses cascade layers, native CSS nesting, `oklch()`, `:has()`, container queries, `@starting-style` with `transition-behavior: allow-discrete`, and the native `<dialog>`; together that sets a floor around **Chrome and Edge 120, Firefox 129 and Safari 17.5** (the features' own support data, not something the project tests). Raising that floor is a major release. Features that are not yet Baseline are progressive: for instance, backdrop click on a Dialog (`closedby="any"`) only works where the browser supports it, and is never the only way to close it.
+The current versions of Chrome, Edge, Firefox and Safari (desktop and mobile). The floor is **per component**, derived from the support data of the CSS features each one uses (not tested by this project):
+
+| Part                                 | Needs                                                                                      | Floor                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Foundations, Button, TextField, Card | cascade layers, native CSS nesting, `oklch()`, `lh` unit, container queries (Card, opt-in) | Chrome/Edge 120, Firefox 120, Safari 17.2 |
+| Checkbox                             | the above plus `:has()`                                                                    | Chrome/Edge 120, Firefox 121, Safari 17.2 |
+| Dialog                               | the above plus `@starting-style` and `transition-behavior: allow-discrete`                 | Chrome/Edge 120, Firefox 129, Safari 17.5 |
+
+One stylesheet serves all of them, so for the whole of 1.0 read the highest row: **Chrome and Edge 120, Firefox 129, Safari 17.5**.
+
+The rule: **the floor of an existing component never rises in a minor release.** A new component may need newer features (the plan uses the Popover API and CSS anchor positioning for later components, [ADR 0005](docs/adr/0005-web-platform-first-for-behaviour.md)); it states its own floor and degrades gracefully where it can, and a minor release that adds it does not change the floors above. Raising the floor of an existing component is a major release. Features that are not yet Baseline are progressive: for instance, backdrop click on a Dialog (`closedby="any"`) only works where the browser supports it, and is never the only way to close it. Server-side rendering and hydration are neither promised nor tested.
 
 | Where                  | What is checked                                                                                                                                                                                                                                  |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
