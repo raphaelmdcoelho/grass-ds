@@ -85,8 +85,28 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
    - Drift check (after 0.6): interaction states per story in `catalog/parity/states.mjs`, a coverage guard, parallel workers with one browser each, full-repaint screenshots and red diff images on failure; `Parity` becomes a required check.
    - Card (done in 0.5): the first composite. `.gr-card` goes on any element (the consumer picks article, section, div, li) with optional `__header`, `__title`, `__actions`, `__media`, `__body` and `__footer` parts styled by class (so the heading level is the consumer's); `data-variant` is outlined (default) or elevated; `data-query` makes it an opt-in query container. In Angular `<gr-card>` is an element in the root entry point (no forms) with attribute directives for the parts and no role or wrapper. Left out of 1.0: clickable or selectable cards, horizontal layout.
    - Dialog (done in 0.6): the second composite and the first with behaviour, all of it native (ADR 0005). `dialog.gr-dialog` opened with `showModal()` and named by `aria-labelledby` on `.gr-dialog__title` (the consumer picks the heading level), with optional `__header`, `__actions`, `__body` and `__footer` parts; `data-size` is sm, md (default) or lg; the body scrolls between a fixed header and footer; the footer can be a `<form method="dialog">` that returns a value; backdrop click is opt-in with `closedby="any"` (Chromium only for now, never the only way out); the page scroll lock is CSS (`html:has(.gr-dialog:modal)`); open and close are `@starting-style` plus `allow-discrete` transitions that collapse under reduced motion. In Angular `<gr-dialog>` wraps the native dialog (`open` model, `closed` output with the return value, `showModal()`/`close()`, part directives, `GR_DIALOG`) and adds no focus handling. Left out of 1.0: non-modal, drawers, nested dialogs, an alertdialog variant, a close icon.
-3. **1.0**: all five components stable in Angular.
+3. **1.0** (done): all five components stable in Angular, and the public API frozen. What it promises is listed in [public-api.md](./public-api.md); the semver rules, the supported Angular versions and browsers, and the deprecation policy are in the README ([Versioning and support](../README.md#versioning-and-support)). 1.0 contains no code change from 0.6.0: it is the commitment, triggered by a commit with a `BREAKING CHANGE:` footer because the default commit-analyzer preset only reads that footer.
+
+## Stability and support (from 1.0)
+
+- **Public API**: semantic and component tokens, `.gr-*` classes with their `data-*`/ARIA hooks and the six `grass.*` layer names, and the exports of the three Angular entry points. Primitive tokens are internal and may change in a minor, so the reversible default holds: making something public later is a minor, narrowing it is a major.
+- **Semver per artefact**: removing or renaming public API, changing a markup contract, dropping an Angular major or a browser is a major; new tokens, components, variants and inputs are a minor; fixes (accessibility and security included) are a patch or a minor. Visual tuning that keeps the contract and WCAG AA is a minor, listed in the release notes; a redesign is a major.
+- **Deprecation**: deprecate in a minor, remove no earlier than the next major.
+- **Angular**: peer range `^22.0.0` (CI tests 22.2.x; 22.0.0 was checked by hand for 1.0); a new major is added in a minor after the tests pass on it, with no promised date; dropping one is a major.
+- **Browsers**: current evergreen, with a floor per component derived from feature support (README). The floor of an existing component never rises in a minor; a new component may need newer features (Popover, anchor positioning). CI verifies Chromium only; the rest is verified by hand, with results recorded in the README table: macOS Safari with VoiceOver passed on 2026-10-19; Safari on iOS, Firefox and NVDA are not yet verified, and forced colours only in Chromium.
+- **One version for all three packages**, with caret peer ranges between them (`workspace:^`): a sibling may be one release behind, never ahead of the packages it depends on.
+
+## Next (ideas only, nothing is committed)
+
+- A React implementation (undecided; the markup contract and the `Parity` check were designed so a second implementation can be checked against the Reference).
+- More components, as the need appears (non-modal dialog and drawers, Select, Tabs, Alert/Toast, clickable cards), each following the same path: tokens, style layer, Reference, Angular, interaction states.
+- npm trusted publishing (OIDC) before January 2027 ([README](../README.md#january-2027-trusted-publishing)).
+- A guard test that fails when a public token, class or exported symbol disappears (a snapshot of `docs/public-api.md`).
+- A dev-mode warning for `aria-describedby`/`role` on `<gr-dialog>` in a 1.0.x patch, and forwarding inputs for them in 1.1.
+- Move the Angular Storybook off the legacy webpack builder; an `@grass-ds/angular/button` subpath; semantic spacing tokens (and promoting `--gr-space-*`) when a need appears; a CI job on the Angular floor.
+- More browsers in CI once Playwright can drive them reliably (Firefox, WebKit).
 
 ## Open points
 
-- The npm org `@grass-ds` still needs to be created on npmjs.com.
+- Manual checks still to do: Safari on iOS, Firefox, NVDA with Firefox, and forced colours on Windows (macOS Safari with VoiceOver passed). Results go in the README table; fixes land as patches.
+- The decisions on the pre-1.0 questions are recorded in [public-api.md](./public-api.md#decisions-on-the-open-questions); the ones marked "later" are additive and can ship in 1.x.

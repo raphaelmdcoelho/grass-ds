@@ -63,7 +63,7 @@ A bordered surface that groups related content and actions, made of optional par
 _Avoid_: Tile, panel, box
 
 **Dialog**:
-A modal surface that interrupts the page to ask for a decision, made of optional parts (header with title, body, footer with actions) on a native `<dialog>` opened with `showModal()`. It is always named by its title and is the first component with behaviour, all of it native (Escape, backdrop, inert page, focus in and back). Non-modal dialogs, drawers and nested dialogs are not part of 1.0.
+A modal surface that interrupts the page to ask for a decision, made of optional parts (header with title, body, footer with actions) on a native `<dialog>` opened with `showModal()`. It is always named by its title and is the first component with behaviour, all of it native (Escape, backdrop, inert page, focus in and back). Non-modal dialogs, drawers and nested dialogs are not part of the Dialog.
 _Avoid_: Modal, popup, lightbox, overlay
 
 **Return value**:
@@ -73,6 +73,10 @@ _Avoid_: Result, response
 **Backdrop dismissal**:
 Closing a Dialog by clicking outside it. Opt-in per dialog (`closedby="any"`), never the only way to close it.
 _Avoid_: Light dismiss, click-away
+
+**Public API**:
+Everything a release number promises: the semantic and component tokens, the `.gr-*` classes with their data and ARIA hooks and the layer names, and the exports of each Angular entry point, as listed in `docs/public-api.md`. Removing or renaming any of it is a breaking change. The Markup contract is part of it; primitive tokens are not.
+_Avoid_: Interface, surface, contract (the Markup contract is only one part)
 
 **Markup contract**:
 The exact elements, classes and attributes a component must render for the style layer to style it; every implementation renders the same markup contract.
