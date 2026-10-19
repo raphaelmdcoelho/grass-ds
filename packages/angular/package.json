@@ -17,7 +17,7 @@
   "peerDependencies": {
     "@angular/core": "^22.0.0",
     "@angular/forms": "^22.0.0",
-    "@grass-ds/css": "workspace:*"
+    "@grass-ds/css": "workspace:^"
   },
   "peerDependenciesMeta": {
     "@angular/forms": {

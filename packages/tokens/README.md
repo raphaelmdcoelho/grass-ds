@@ -20,7 +20,7 @@ Load the stylesheet once, before `@grass-ds/css` (it declares the `grass.tokens`
 @import '@grass-ds/css/grass.css';
 ```
 
-Or link `node_modules/@grass-ds/tokens/dist/tokens.css` from your bundler or `angular.json`.
+In `angular.json` use the specifier too: `"styles": ["@grass-ds/tokens/tokens.css", ...]`. Without a bundler, link `node_modules/@grass-ds/tokens/dist/tokens.css` (the file behind that export).
 
 ## Theming
 
@@ -31,5 +31,9 @@ There are two themes, light and dark. The OS preference (`prefers-color-scheme`)
 ```
 
 Themes switch only on `<html>`; per-subtree themes are not supported. Only semantic tokens change between themes, and the build fails if a foreground/background pair misses WCAG 2.2 AA.
+
+## Public API
+
+Semver covers the **semantic** tokens (`--gr-color-*`, `--gr-text-*`, `--gr-layout-*`, `--gr-radius-*`, `--gr-motion-*`, ...) and the **component** tokens (`--gr-button-*`, `--gr-text-field-*`, `--gr-checkbox-*`, `--gr-card-*`, `--gr-dialog-*`): their names and roles are stable, their values are tuned in minor releases, and a semantic colour always keeps WCAG AA contrast. **Primitive** tokens (`--gr-palette-*`, `--gr-space-*`, `--gr-font-*`, ...) are internal and may change in a minor release; build on the semantic tier. The full list is in [docs/public-api.md](https://github.com/raphaelmdcoelho/grass-ds/blob/main/docs/public-api.md), and the rules in [Versioning and support](https://github.com/raphaelmdcoelho/grass-ds#versioning-and-support).
 
 All `@grass-ds/*` packages share one version, so upgrade them together.

@@ -28,13 +28,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
-    "culori": "^4.0.2",
-    "style-dictionary": "^5.6.1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/raphaelmdcoelho/grass-ds.git",
     "directory": "packages/tokens"
+  },
+  "devDependencies": {
+    "culori": "^4.0.2",
+    "style-dictionary": "^5.6.1"
   }
 }
