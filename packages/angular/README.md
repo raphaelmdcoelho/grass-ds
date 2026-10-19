@@ -18,14 +18,18 @@ npm install @grass-ds/angular @grass-ds/css @grass-ds/tokens
 ]
 ```
 
-`fonts.css` is optional. All packages share one version, so upgrade them together.
+`fonts.css` is optional. All packages share one version, so upgrade them together. `@grass-ds/css` and `@grass-ds/tokens` must be the same version as this package.
+
+The exports of the three entry points (`@grass-ds/angular`, `/text-field`, `/checkbox`), their selectors, inputs, outputs and methods are the public API: see [docs/public-api.md](https://github.com/raphaelmdcoelho/grass-ds/blob/main/docs/public-api.md) and [Versioning and support](https://github.com/raphaelmdcoelho/grass-ds#versioning-and-support). Angular 22 is supported (`^22.0.0`); newer majors are added to the range in a minor release.
 
 ## Button
 
 ```ts
+import { Component, signal } from '@angular/core';
 import { GrButton } from '@grass-ds/angular';
 
 @Component({
+  selector: 'app-buttons',
   imports: [GrButton],
   template: `
     <button grButton>Save</button>
@@ -34,7 +38,9 @@ import { GrButton } from '@grass-ds/angular';
     <a grButton href="/docs">Docs</a>
   `,
 })
-export class Example {}
+export class Buttons {
+  readonly busy = signal(false);
+}
 ```
 
 | Input      | Type                                   | Default     | Notes                                                                     |
@@ -80,11 +86,11 @@ export class Plan {}
 - **`header` and `footer` elements**: a `<header>` or `<footer>` that is not inside an `<article>`, `<section>` (named) or `role="article"` is exposed as a **banner** or **contentinfo landmark**, so ten plain cards would add ten banners. Use `<div grCardHeader>` and `<div grCardFooter>`, as above, and use `<header>`/`<footer>` only when the card itself is an `article`, a `section` or has `role="article"`.
 - **Heading level**: `grCardTitle` goes on whichever heading element fits your page (`<h2>`, `<h3>`...); the card never picks one.
 - **Semantics**: the `<gr-card>` host has no role. Add `role="article"` (or `group`/`region`) **together with** `aria-labelledby` pointing at the title, or leave it as a plain container. Attributes you write on the host are kept. For a list of cards, put each in an `<li>`.
-- **Not interactive as a whole**: do not make the card a link or button, and do not nest interactive cards; put actions in the header or footer. Left out of 1.0: clickable or selectable cards, a horizontal layout.
+- **Not interactive as a whole**: do not make the card a link or button, and do not nest interactive cards; put actions in the header or footer. Not included: clickable or selectable cards, a horizontal layout.
 
 ## Dialog
 
-The Dialog is a composite, so it is an element, `<gr-dialog>`, with its parts as attribute directives on elements **you** choose. It wraps a native `<dialog class="gr-dialog">` that it opens with `showModal()` (modal only in 1.0), so the browser provides the top layer, the backdrop, the inert page behind it, Escape, and moving focus in and back to the element that opened it. It needs no `@angular/forms` and no CDK.
+The Dialog is a composite, so it is an element, `<gr-dialog>`, with its parts as attribute directives on elements **you** choose. It wraps a native `<dialog class="gr-dialog">` that it opens with `showModal()` (modal only), so the browser provides the top layer, the backdrop, the inert page behind it, Escape, and moving focus in and back to the element that opened it. It needs no `@angular/forms` and no CDK.
 
 ```ts
 import { Component } from '@angular/core';
@@ -133,13 +139,13 @@ Methods, used through a template reference (`#confirm`) or `viewChild`: `showMod
 - **Content and `@if`**: the content is created together with the parent view, also while the dialog is closed, so a component inside it is already running. To create it only when needed, wrap it in `@if (isOpen())` (with `[(open)]`) or `@if (confirm.open())`; `@if` inside `<gr-dialog>` works as anywhere else.
 - **Focus**: the native behaviour is kept and nothing is added: initial focus goes to the first focusable element or the `autofocus` one (use `autofocus` on Cancel in a destructive confirmation), and closing returns focus to the opener. Open the dialog from a user action, never on page load.
 - **Backdrop click and Escape**: Escape always closes. `closeOnBackdrop` is opt-in and is never the only way out.
-- **Not supported in 1.0**: `role="alertdialog"` and `aria-describedby`. Attributes written on `<gr-dialog>` land on the `display: contents` host, not on the native dialog, so they do nothing; a forwarding input can be added later. Name the dialog with `grDialogTitle` or `label` only.
+- **Not supported**: `role="alertdialog"` and `aria-describedby`. Attributes written on `<gr-dialog>` land on the `display: contents` host, not on the native dialog, so they do nothing; a forwarding input can be added later. Name the dialog with `grDialogTitle` or `label` only.
 - **Title in another component**: `grDialogTitle` registers with the `<gr-dialog>` it is written inside. A title that lives in another component's template does not register: set `label` on the dialog instead. In dev mode an open dialog with neither a title nor a label logs a warning.
 - **Scroll lock**: while open, the page does not scroll (`html:has(.gr-dialog:modal) { overflow: hidden }` in the `grass.components` layer). Add `scrollbar-gutter: stable` to `html` to avoid the sideways shift when the page scrollbar disappears. An unlayered `html { overflow: ... }` rule in your own CSS beats the lock, because unlayered styles win over layers.
 - **Enter in a form**: pressing Enter in a field submits the form with its **first** submit button, so order the buttons accordingly, and put `autofocus` on the least destructive one (Cancel) in a destructive confirmation.
-- **Tested in**: Chromium. Firefox, Safari and screen readers are not yet verified by me.
+- **Tested in**: Chromium in CI. Manual results for Firefox, Safari and screen readers are in the [support table](https://github.com/raphaelmdcoelho/grass-ds#versioning-and-support).
 - **Rendered DOM**: `<gr-dialog>` has `display: contents` and contains exactly the Reference markup, `<dialog class="gr-dialog">` with your parts as direct children.
-- **Left out of 1.0**: non-modal dialogs, drawers and side sheets, nested dialogs, an alertdialog variant, and a close icon (see the CSS README).
+- **Not included**: non-modal dialogs, drawers and side sheets, nested dialogs, an alertdialog variant, and a close icon (see the CSS README).
 
 ## TextField
 
