@@ -213,4 +213,4 @@ These were raised before the freeze and decided by the owner. The numbering is t
 | 9   | `aria-describedby` and `role` on `<gr-dialog>` do nothing                    | **Later.** A dev-mode warning in a 1.0.x patch, forwarding inputs in 1.1 (both additive).                                   |
 | 10  | `culori` and `style-dictionary` under the tokens `dependencies`              | **Changed.** Moved to `devDependencies`: a tokens-only install went from 84 packages (62 MB) to 1.                          |
 
-Still open after 1.0: the findings of the manual Safari, Firefox and screen-reader checklist (README, "Manual verification for 1.0") may add items here.
+Manual verification (README, "Manual verification for 1.0"): macOS Safari with VoiceOver passed all 22 checks on 2026-10-19 and added no item here. Safari on iOS, Firefox and NVDA are not yet verified, and forced colours is verified only in Chromium; findings from those may add items here.

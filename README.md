@@ -137,15 +137,15 @@ The rule: **the floor of an existing component never rises in a minor release.**
 | CI, every pull request | Chromium only: the Reference and Angular Catalog are rendered in light, dark and forced-colours modes, pixel for pixel and by accessibility tree (see `catalog/parity`), plus unit tests and the WCAG AA contrast check of the semantic colours. |
 | By hand, for 1.0       | See the table below.                                                                                                                                                                                                                             |
 
-**Manual verification for 1.0** (to be filled in from the owner's checklist; an empty cell is not verified):
+**Manual verification for 1.0** (by the owner, a 22-point checklist run on 2026-10-19; a cell that says "Not yet verified" has not been checked):
 
-| Browser / assistive technology | Version | Result | Date | Notes |
-| ------------------------------ | ------- | ------ | ---- | ----- |
-| Safari (macOS)                 |         |        |      |       |
-| Safari (iOS)                   |         |        |      |       |
-| Firefox                        |         |        |      |       |
-| VoiceOver (Safari)             |         |        |      |       |
-| NVDA (Firefox)                 |         |        |      |       |
+| Browser / assistive technology | Version      | Result           | Date       | Notes                                                                                                                                                                                                                                                     |
+| ------------------------------ | ------------ | ---------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Safari (macOS)                 | not recorded | Pass             | 2026-10-19 | Reference and Angular stories, all 22 checks: Dialog, TextField, Checkbox, Button, Card. Forced colours / Windows contrast themes cannot run on macOS: they are verified only in Chromium (CI parity in forced-colours mode).                             |
+| Safari (iOS)                   |              | Not yet verified |            |                                                                                                                                                                                                                                                           |
+| Firefox                        |              | Not yet verified |            |                                                                                                                                                                                                                                                           |
+| VoiceOver (Safari)             | not recorded | Pass             | 2026-10-19 | Same run as Safari (macOS): named dialog announced, focus returns to the opener, errors announced (pre-rendered as invalid, dynamic ones immediately through `role="alert"`), indeterminate announced as mixed, headings and no stray landmarks in cards. |
+| NVDA (Firefox)                 |              | Not yet verified |            |                                                                                                                                                                                                                                                           |
 
 Browser and assistive-technology problems found later are bug fixes (patch or minor), not breaking changes.
 
