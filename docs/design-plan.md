@@ -71,7 +71,7 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 
 - Every PR: build, token contrast check, unit tests, commitlint over every commit in the PR (hooks can be bypassed locally), and the drift check (`Parity`, a required check once the owner adds it to the ruleset).
 - Merges to `main` keep every commit (merge or rebase, no squash), so each commit must be a valid Conventional Commit.
-- On merge to `main`: semantic-release derives the version from the commits, sets it on every package, tags, publishes to npm with provenance, and deploys the Catalog to GitHub Pages.
+- On merge to `main`: semantic-release derives the version from the commits, sets it on every package, tags, publishes to npm through trusted publishing (OIDC, with provenance), and deploys the Catalog to GitHub Pages.
 
 ## Milestones
 
@@ -100,7 +100,7 @@ All packages share one version number ([ADR 0003](./adr/0003-publish-packages-to
 
 - A React implementation (undecided; the markup contract and the `Parity` check were designed so a second implementation can be checked against the Reference).
 - More components, as the need appears (non-modal dialog and drawers, Select, Tabs, Alert/Toast, clickable cards), each following the same path: tokens, style layer, Reference, Angular, interaction states.
-- npm trusted publishing (OIDC) before January 2027 ([README](../README.md#january-2027-trusted-publishing)).
+- Finish the move to npm trusted publishing before January 2027: the workflow is ready, the owner configures the trusted publishers, confirms the first OIDC release, then disallows tokens and deletes `NPM_TOKEN` ([README](../README.md#trusted-publishing-npm-oidc)).
 - A guard test that fails when a public token, class or exported symbol disappears (a snapshot of `docs/public-api.md`).
 - A dev-mode warning for `aria-describedby`/`role` on `<gr-dialog>` in a 1.0.x patch, and forwarding inputs for them in 1.1.
 - Move the Angular Storybook off the legacy webpack builder; an `@grass-ds/angular/button` subpath; semantic spacing tokens (and promoting `--gr-space-*`) when a need appears; a CI job on the Angular floor.

@@ -180,19 +180,46 @@ The committed Claude Code status line (`.claude/statusline.sh`) needs `jq` on th
 
 ## Releasing
 
-Releases are automatic with semantic-release (see [ADR 0003](docs/adr/0003-publish-packages-to-npm.md)). Every push to `main` runs [`release.yml`](.github/workflows/release.yml): it derives the next version from the Conventional Commits since the last tag (merge commits such as "Merge pull request #1" are not conventional and are ignored), builds, sets that version on every package, publishes `@grass-ds/tokens`, `@grass-ds/css` and `@grass-ds/angular` to npm with provenance, tags `vX.Y.Z` and creates the GitHub release. The private catalogs are never published. `@grass-ds/angular` is built by ng-packagr, so it publishes its `dist/` folder (`publishConfig.directory`); the version is therefore set on every package before the build, so that the generated `dist/package.json` carries it. The first publish of a new package needs a token that may create packages in the `@grass-ds` scope, which the granular `NPM_TOKEN` below must allow. The history starts at `v0.0.0` on the first commit of `main` (semantic-release never creates that tag), and the project was versioned 0.x until the 1.0.0 release, which was triggered by a commit with a `BREAKING CHANGE:` footer even though no code broke: semantic-release's default preset only recognises that footer, not the `!` shorthand, so a major version needs one. A future major is triggered the same way, and the footer should say what actually breaks.
+Releases are automatic with semantic-release (see [ADR 0003](docs/adr/0003-publish-packages-to-npm.md)). Every push to `main` runs [`release.yml`](.github/workflows/release.yml): it derives the next version from the Conventional Commits since the last tag (merge commits such as "Merge pull request #1" are not conventional and are ignored), builds, sets that version on every package, publishes `@grass-ds/tokens`, `@grass-ds/css` and `@grass-ds/angular` to npm through trusted publishing, tags `vX.Y.Z` and creates the GitHub release. The private catalogs are never published. `@grass-ds/angular` is built by ng-packagr, so it publishes its `dist/` folder (`publishConfig.directory`); the version is therefore set on every package before the build, so that the generated `dist/package.json` carries it. The first publish of a new package name cannot use trusted publishing (a trusted publisher is configured on an existing package), so it needs the token fallback described below or a manual first publish. The history starts at `v0.0.0` on the first commit of `main` (semantic-release never creates that tag), and the project was versioned 0.x until the 1.0.0 release, which was triggered by a commit with a `BREAKING CHANGE:` footer even though no code broke: semantic-release's default preset only recognises that footer, not the `!` shorthand, so a major version needs one. A future major is triggered the same way, and the footer should say what actually breaks.
 
 The Catalog is one site: the Reference Storybook at the root and the Angular Storybook at `/angular/`, assembled by `catalog/compose.mjs` into `catalog/site`. It is deployed to GitHub Pages by [`pages.yml`](.github/workflows/pages.yml) on every push to `main` (it documents `main`, so it does not wait for an npm release). The repository's Pages source must be set to "GitHub Actions". The site lives under `/grass-ds/`; Both Storybooks build with relative asset paths and the Reference lists the Angular one by a relative URL, so no base setting is needed.
 
-### npm token rotation
+### Trusted publishing (npm OIDC)
 
-Publishing uses the repository secret `NPM_TOKEN`, a granular npm access token with read and write access to the `@grass-ds` packages. It is exposed to `semantic-release` as `NODE_AUTH_TOKEN`, and the `.npmrc` that reads it is written by `actions/setup-node` through `registry-url`. npm limits how long write tokens live (90 days at the time of writing; see [About access tokens](https://docs.npmjs.com/about-access-tokens/) for the current rule), so rotate it before it expires:
+The release job publishes without a stored npm token. `pnpm -r publish` (pnpm 12) exchanges the job's GitHub OIDC token for a short-lived publish credential per package, and attaches provenance on its own for a public package from a public repository (see npm's [trusted publishing](https://docs.npmjs.com/trusted-publishers/) and pnpm's [`publish`](https://pnpm.io/cli/publish)). That is why `release.yml` has `id-token: write` and why `--provenance` is no longer passed. Requirements, all met: npm CLI 11.5.1 or later for npm's own flow (the Node 26 in `.nvmrc` ships npm 11.20), a cloud-hosted runner, and a trusted publisher on each package. pnpm does its own exchange and does not use npm for publishing.
 
-1. On npmjs.com, create a new granular access token with read and write permission on the `@grass-ds` packages and the longest expiry npm allows.
-2. Replace the `NPM_TOKEN` secret under Settings, Secrets and variables, Actions.
-3. Revoke the old token and put the next expiry date in your calendar.
+How the pieces fit:
 
-A bad or expired token is caught before anything is tagged: `verifyConditionsCmd` in `.releaserc.json` runs `npm whoami` with the same `NODE_AUTH_TOKEN`, so the release job fails at the start and no tag is created.
+- **Trusted publisher** (npmjs.com, per package, set by the owner): provider GitHub Actions, user `raphaelmdcoelho`, repository `grass-ds`, workflow `release.yml`, environment `npm`. The environment is checked against the job's `environment: npm`, which `release.yml` declares; restrict that GitHub environment to the `main` branch and do not add required reviewers (releases are automatic).
+- **Verify step**: `npm whoami` needs a token and says nothing about OIDC, so `verifyConditionsCmd` in `.releaserc.json` only checks that the job can request an OIDC token (`id-token: write`). Whether npm accepts the trusted publisher is only known at publish time.
+- **Transition**: `release.yml` still passes the `NPM_TOKEN` secret as `NODE_AUTH_TOKEN`. pnpm tries OIDC first and uses the token only when OIDC does not apply, so the token does not defeat the purpose as long as it is deleted afterwards; with the secret deleted the value is empty and ignored. Because a silent fallback would hide a wrong trusted-publisher setting, the last step of the job (_Check how the release was authenticated_) reads the publisher npm recorded for each new version and raises a warning annotation unless it is `GitHub Actions <npm-oidc-no-reply@github.com>`. A publish through the token shows the owner's address instead, and carries no provenance.
+- **A new trusted publisher expires** if it has not completed a successful publish within 2 days, so configure them right before merging the release that will use them, not weeks earlier.
+
+#### Owner checklist (npmjs.com and GitHub; only the owner can do these)
+
+Do the first four steps shortly before merging the first `fix`/`feat` that produces a release (within 2 days of it), and the last three after that release succeeded.
+
+1. GitHub, Settings, Environments, New environment `npm`: deployment branches "Selected branches", add `main`. No required reviewers, no secrets.
+2. npmjs.com, for **each** of `@grass-ds/tokens`, `@grass-ds/css`, `@grass-ds/angular`: package, Settings, Trusted publisher, GitHub Actions. Organization or user `raphaelmdcoelho`, repository `grass-ds`, workflow filename `release.yml` (the filename only, with the extension), environment name `npm`. npm does not validate the values when you save, mistakes only show at publish time. Existing entries cannot be edited, only deleted and recreated.
+3. Keep the `NPM_TOKEN` secret until the first OIDC release is confirmed (it is the fallback, and the 2-day window means a failed attempt needs a quick retry).
+4. Merge the release-producing PR, then check the run (below).
+5. After the check passed: on npmjs.com, each package, Settings, Publishing access: "Require two-factor authentication and disallow tokens", save. (npm needs 2FA on the owner account for this.)
+6. GitHub, Settings, Secrets and variables, Actions: delete `NPM_TOKEN`.
+7. npmjs.com, Access tokens: revoke the old granular token.
+
+#### Confirming the first OIDC release
+
+After the release job runs on `main`:
+
+1. The log of the **Release** step shows `pnpm -r publish` publishing the three packages with no "falling back"/OIDC warning, and the **Check how the release was authenticated** step prints `published by: GitHub Actions <npm-oidc-no-reply@github.com>` for all three with no warning annotation.
+2. `npm view @grass-ds/css@X.Y.Z _npmUser dist.attestations` shows that publisher and an attestation, and each package's npm page shows the provenance and "Published via a trusted publisher" badge.
+3. If a package was published with the token instead (warning annotation), fix its trusted publisher entry (step 2 above, it must be recreated if wrong) and let the next release prove it; do not delete the token yet.
+
+If the release job fails after the tag was pushed (a rejected publish, a wrong trusted publisher), recover as below. With the token secret already deleted the publish fails closed; fix the trusted publisher entry first, then delete the tag and re-run.
+
+### Token fallback and rotation (only while `NPM_TOKEN` exists)
+
+Until the secret is deleted it is a granular npm access token with read and write access to the `@grass-ds` packages, written to the `.npmrc` that `actions/setup-node` creates (`registry-url`). npm limits how long write tokens live (90 days at the time of writing; see [About access tokens](https://docs.npmjs.com/about-access-tokens/)), and stops allowing granular tokens to publish in January 2027. Do not rotate it for its own sake: finish the checklist above and remove it. If it has to be replaced in the meantime, create a new granular token with read and write on the `@grass-ds` packages, replace the secret, and revoke the old one.
 
 ### Recovering from a failed release
 
@@ -203,15 +230,6 @@ git push origin :refs/tags/vX.Y.Z
 ```
 
 `pnpm -r publish` skips versions that are already on npm, so a partly completed publish (one package out, one not) recovers the same way. If a GitHub release was already created for the tag, delete it as well.
-
-### January 2027: trusted publishing
-
-npm has announced that it removes direct publishing with access tokens in January 2027 (see the [npm documentation](https://docs.npmjs.com/about-access-tokens/) for the exact scope and date). After that, CI has to publish through trusted publishing (OIDC), or through the stage-only token plus `npm stage approve` flow. The release workflow already requests `id-token: write` and publishes with `--provenance`, so the move to [trusted publishing](https://docs.npmjs.com/trusted-publishers/) is small:
-
-1. Follow the npm documentation to add a trusted publisher to each package: provider GitHub Actions, repository `raphaelmdcoelho/grass-ds`, workflow `release.yml`. npm may require the package to exist before one can be configured; if so, publish the first version with the token.
-2. In `release.yml`, remove the `NODE_AUTH_TOKEN` line and keep `registry-url`. npm then exchanges the job's OIDC token for a short-lived publish credential, which needs a recent npm (the documentation states the minimum; the Node 26 pinned in `.nvmrc` ships npm 11).
-3. Replace `verifyConditionsCmd` (`npm whoami` does not work with OIDC) or drop it.
-4. Delete the `NPM_TOKEN` secret and revoke the token.
 
 ## Licence
 
