@@ -16,13 +16,17 @@ permissions:
   contents: write # push the version tag, create the GitHub release
   issues: write # comment on released issues
   pull-requests: write # comment on released pull requests
-  id-token: write # npm provenance (and trusted publishing, see README)
+  id-token: write # npm trusted publishing (OIDC) and the provenance that comes with it, see README
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # The environment the npm trusted publishers are bound to (README, "Trusted publishing"). Restrict
+    # it to the `main` branch under Settings, Environments; do not add required reviewers, releases
+    # are automatic.
+    environment: npm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -44,6 +48,29 @@ jobs:
         run: pnpm exec semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Read by the .npmrc that setup-node writes for registry-url. Provenance is requested by the
-          # --provenance flag in .releaserc.json.
+          # Publishing authenticates with the job's OIDC token (npm trusted publishing), no secret needed.
+          # TRANSITION ONLY: pnpm tries OIDC first and falls back to this token when OIDC does not apply.
+          # Once an OIDC publish is confirmed, delete the NPM_TOKEN secret (README); this line then
+          # resolves to an empty value, which pnpm ignores, and can be removed at leisure.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Warn when a release went out with a token instead of OIDC: the registry records the publisher
+      # of a trusted-publishing release as "GitHub Actions <npm-oidc-no-reply@github.com>".
+      - name: Check how the release was authenticated
+        run: |
+          version=$(node -p "require('./packages/css/package.json').version")
+          if [ "$version" = 0.0.0-development ]; then
+            echo "No release in this run."
+            exit 0
+          fi
+          for name in tokens css angular; do
+            publisher=
+            for _ in 1 2 3 4 5 6; do
+              publisher=$(npm view "@grass-ds/$name@$version" _npmUser.email 2>/dev/null || true)
+              [ -n "$publisher" ] && break
+              sleep 10
+            done
+            echo "@grass-ds/$name@$version published by: ${publisher:-unknown}"
+            if [ "$publisher" != npm-oidc-no-reply@github.com ]; then
+              echo "::warning::@grass-ds/$name@$version was not published through trusted publishing (publisher: ${publisher:-unknown}). Check the trusted publisher settings on npmjs.com."
+            fi
+          done
